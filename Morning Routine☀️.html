@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SE's Morning Routine</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0D0B08;
+    --surface: #161310;
+    --surface2: #1E1A15;
+    --border: rgba(255,255,255,0.06);
+    --cream: #F0EAD8;
+    --gold: #C8994A;
+    --gold-dim: rgba(200,153,74,0.15);
+    --rose: #C4714A;
+    --muted: rgba(240,234,216,0.4);
+    --green: #7A9A6A;
+    --green-dim: rgba(122,154,106,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* Subtle grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.6;
+  }
+
+  .app {
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 40px 20px 100px;
+    position: relative;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 36px;
+  }
+
+  .brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 300;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .brand-sub {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    margin-top: 4px;
+    text-transform: uppercase;
+  }
+
+  .date-block {
+    text-align: right;
+  }
+
+  .date-day {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 48px;
+    font-weight: 300;
+    line-height: 1;
+    color: var(--cream);
+    font-style: italic;
+  }
+
+  .date-info {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+  }
+
+  /* ── CLOCK SECTION ── */
+  .clock-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .clock-section::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 160px; height: 160px;
+    background: radial-gradient(circle, rgba(200,153,74,0.08), transparent 70%);
+    border-radius: 50%;
+  }
+
+  .current-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 64px;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    color: var(--cream);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .current-time .seconds {
+    font-size: 32px;
+    color: var(--muted);
+    vertical-align: middle;
+  }
+
+  .alarm-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .alarm-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .alarm-time-display {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .alarm-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+  }
+
+  .alarm-toggle {
+    width: 44px; height: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .alarm-toggle.on { background: var(--gold); border-color: var(--gold); }
+
+  .alarm-toggle::after {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    background: var(--cream);
+    border-radius: 50%;
+    top: 2px; left: 3px;
+    transition: transform 0.3s;
+  }
+
+  .alarm-toggle.on::after { transform: translateX(20px); }
+
+  /* Countdown badge */
+  .countdown-badge {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .countdown-badge span {
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── WEATHER ── */
+  .weather-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px 28px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .weather-card::before {
+    content: '';
+    position: absolute;
+    bottom: -20px; right: -20px;
+    width: 120px; height: 120px;
+    background: radial-gradient(circle, rgba(122,154,106,0.07), transparent 70%);
+    border-radius: 50%;
+  }
+
+  .weather-left {}
+
+  .weather-location {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .weather-location::before {
+    content: '◎';
+    color: var(--green);
+    font-size: 8px;
+  }
+
+  .weather-temp {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 52px;
+    font-weight: 300;
+    line-height: 1;
+    color: var(--cream);
+  }
+
+  .weather-temp sup {
+    font-size: 20px;
+    vertical-align: top;
+    margin-top: 8px;
+    display: inline-block;
+    color: var(--muted);
+  }
+
+  .weather-desc {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+    letter-spacing: 0.05em;
+  }
+
+  .weather-right {
+    text-align: right;
+  }
+
+  .weather-icon {
+    font-size: 48px;
+    line-height: 1;
+    margin-bottom: 8px;
+    display: block;
+    filter: drop-shadow(0 0 12px rgba(200,153,74,0.3));
+  }
+
+  .weather-detail {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    line-height: 1.8;
+  }
+
+  .weather-loading {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  /* Outdoor suggestion */
+  .outdoor-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+
+  .outdoor-badge.good { background: var(--green-dim); color: var(--green); border: 1px solid rgba(122,154,106,0.2); }
+  .outdoor-badge.caution { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(200,153,74,0.2); }
+
+  /* ── STREAK ── */
+  .streak-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px 28px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .streak-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 64px;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .streak-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .streak-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .streak-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 0;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .streak-dot.done { background: var(--gold-dim); border-color: var(--gold); }
+  .streak-dot.done .dot-inner { background: var(--gold); border-radius: 50%; width: 8px; height: 8px; }
+  .streak-dot .dot-day { font-size: 8px; color: var(--muted); }
+
+  /* ── CHECKLIST ── */
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    padding-left: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .section-label .reset-btn {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: inherit;
+    font-family: inherit;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    text-transform: uppercase;
+  }
+
+  .section-label .reset-btn:hover { opacity: 1; color: var(--rose); }
+
+  .checklist {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .check-item:last-child { border-bottom: none; }
+  .check-item:hover { background: rgba(255,255,255,0.02); }
+
+  .check-item.done { opacity: 0.5; }
+
+  .check-item.done::after {
+    content: '';
+    position: absolute;
+    left: 24px; right: 24px;
+    top: 50%; height: 1px;
+    background: var(--muted);
+  }
+
+  .check-box {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    background: var(--surface2);
+  }
+
+  .check-item.done .check-box {
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+
+  .check-box-inner {
+    font-size: 10px;
+    color: var(--bg);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .check-item.done .check-box-inner { opacity: 1; }
+
+  .check-icon {
+    font-size: 18px;
+    width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .check-content { flex: 1; }
+
+  .check-title {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--cream);
+    letter-spacing: 0.02em;
+  }
+
+  .check-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.03em;
+  }
+
+  .check-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .progress-bar {
+    flex: 1;
+    height: 2px;
+    background: var(--surface2);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 1px;
+    transition: width 0.5s ease;
+  }
+
+  .progress-pct {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    min-width: 32px;
+    text-align: right;
+  }
+
+  /* ── MOTIVATIONAL QUOTE ── */
+  .quote-card {
+    background: linear-gradient(135deg, var(--surface) 0%, rgba(200,153,74,0.05) 100%);
+    border: 1px solid rgba(200,153,74,0.15);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .quote-card::before {
+    content: '"';
+    position: absolute;
+    top: -10px; left: 20px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 120px;
+    font-style: italic;
+    color: rgba(200,153,74,0.08);
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .quote-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-style: italic;
+    font-weight: 300;
+    line-height: 1.6;
+    color: var(--cream);
+    position: relative;
+    margin-bottom: 12px;
+  }
+
+  .quote-author {
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* ── COMPLETE STATE ── */
+  .complete-banner {
+    background: linear-gradient(135deg, var(--green-dim), rgba(122,154,106,0.05));
+    border: 1px solid rgba(122,154,106,0.2);
+    border-radius: 20px;
+    padding: 28px;
+    text-align: center;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  .complete-banner.show { display: block; }
+
+  .complete-emoji { font-size: 40px; margin-bottom: 12px; }
+
+  .complete-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-style: italic;
+    color: var(--green);
+    margin-bottom: 8px;
+  }
+
+  .complete-sub {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    line-height: 1.8;
+  }
+
+  /* ── JAZZ PLAYER (SoundCloud) ── */
+  .jazz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 20px 24px 24px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .jazz-card::before {
+    content: '';
+    position: absolute;
+    top: -30px; left: -30px;
+    width: 140px; height: 140px;
+    background: radial-gradient(circle, rgba(200,153,74,0.06), transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .jazz-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .jazz-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .jazz-vinyl {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: conic-gradient(#1a1a1a 0deg, #2a2520 60deg, #1a1a1a 120deg, #2a2520 180deg, #1a1a1a 240deg, #2a2520 300deg, #1a1a1a 360deg);
+    border: 2px solid rgba(200,153,74,0.3);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .jazz-vinyl::after {
+    content: '';
+    width: 8px; height: 8px;
+    background: var(--gold);
+    border-radius: 50%;
+    position: absolute;
+  }
+
+  @keyframes vinylSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  .jazz-vinyl.spinning { animation: vinylSpin 3s linear infinite; }
+
+  .jazz-info {}
+  .jazz-track-name {
+    font-size: 13px; font-weight: 400;
+    color: var(--cream); letter-spacing: 0.02em;
+  }
+  .jazz-genre {
+    font-size: 10px; color: var(--gold);
+    letter-spacing: 0.15em; text-transform: uppercase; margin-top: 2px;
+  }
+
+  .shuffle-badge {
+    font-size: 10px; letter-spacing: 0.1em;
+    color: var(--gold); background: var(--gold-dim);
+    border: 1px solid rgba(200,153,74,0.2);
+    padding: 4px 10px; border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .sc-wrap { position: relative; }
+
+  /* hide SC branding bar a bit */
+  .sc-wrap iframe { display: block; }
+
+  .jazz-playlist-row {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px;
+  }
+
+  .pl-chip {
+    font-size: 10px; letter-spacing: 0.08em;
+    padding: 5px 12px; border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--muted); cursor: pointer;
+    transition: all 0.2s; background: none;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .pl-chip:hover { border-color: var(--gold); color: var(--gold); }
+  .pl-chip.active { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+
+
+
+  @keyframes ring {
+    0%, 100% { transform: rotate(0deg); }
+    10%, 30%, 50%, 70%, 90% { transform: rotate(-8deg); }
+    20%, 40%, 60%, 80% { transform: rotate(8deg); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .alarm-ring-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(13,11,8,0.95);
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    display: none;
+  }
+
+  .alarm-ring-overlay.show { display: flex; animation: slideUp 0.4s ease; }
+
+  .alarm-bell {
+    font-size: 72px;
+    animation: ring 0.6s ease-in-out infinite;
+  }
+
+  .alarm-ring-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 80px;
+    color: var(--gold);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+  }
+
+  .alarm-ring-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-style: italic;
+    color: var(--cream);
+    letter-spacing: 0.1em;
+  }
+
+  .alarm-dismiss {
+    margin-top: 16px;
+    padding: 16px 48px;
+    background: var(--gold);
+    color: var(--bg);
+    border: none;
+    border-radius: 40px;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 500;
+    transition: transform 0.1s;
+  }
+
+  .alarm-dismiss:hover { transform: scale(1.03); }
+
+  /* Bottom tab */
+  .bottom-tab {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%; max-width: 420px;
+    padding: 16px 24px 28px;
+    background: linear-gradient(to top, var(--bg) 60%, transparent);
+    display: flex;
+    justify-content: space-around;
+    z-index: 100;
+  }
+
+  .tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    opacity: 0.4;
+    transition: opacity 0.2s;
+  }
+
+  .tab-item.active { opacity: 1; }
+  .tab-item:hover { opacity: 0.8; }
+
+  .tab-icon { font-size: 20px; }
+
+  .tab-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--cream);
+    text-transform: uppercase;
+  }
+
+  .tab-item.active .tab-label { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<!-- ALARM OVERLAY -->
+<div class="alarm-ring-overlay" id="alarmOverlay">
+  <div class="alarm-bell">🔔</div>
+  <div class="alarm-ring-time" id="alarmRingTime">08:30</div>
+  <div class="alarm-ring-label">좋은 아침이에요 ☀️</div>
+  <button class="alarm-dismiss" onclick="dismissAlarm()">일어났어요</button>
+</div>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <div class="brand">SE's</div>
+      <div class="brand-sub">Morning Routine</div>
+    </div>
+    <div class="date-block">
+      <div class="date-day" id="dateDay">30</div>
+      <div class="date-info" id="dateInfo">토요일 · 5월</div>
+    </div>
+  </div>
+
+  <!-- CLOCK + ALARM -->
+  <div class="clock-section">
+    <div class="current-time">
+      <span id="clockHM">00:00</span><span class="seconds" id="clockS">:00</span>
+    </div>
+    <div class="alarm-row">
+      <div>
+        <div class="alarm-label">목표 기상</div>
+        <div class="countdown-badge" id="countdownText">알람까지 <span id="countdown">—</span></div>
+      </div>
+      <div class="alarm-time-display">
+        <div class="alarm-time">08:30</div>
+        <div class="alarm-toggle" id="alarmToggle" onclick="toggleAlarm()"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WEATHER -->
+  <div class="weather-card">
+    <div class="weather-left" id="weatherLeft">
+      <div class="weather-location">수원, 경기도</div>
+      <div class="weather-loading">날씨 불러오는 중…</div>
+    </div>
+    <div class="weather-right" id="weatherRight"></div>
+  </div>
+
+  <!-- STREAK -->
+  <div class="streak-card">
+    <div>
+      <div class="streak-number" id="streakNum">0</div>
+      <div class="streak-label">연속 달성 🔥</div>
+    </div>
+    <div class="streak-dots" id="streakDots"></div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="section-label">
+    오늘의 루틴
+    <button class="reset-btn" onclick="resetChecklist()">초기화</button>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-pct" id="progressPct">0%</div>
+  </div>
+
+  <!-- COMPLETE BANNER -->
+  <div class="complete-banner" id="completeBanner">
+    <div class="complete-emoji">🌟</div>
+    <div class="complete-title">오늘 루틴 완성!</div>
+    <div class="complete-sub">모든 미션을 해냈어요.<br>당신의 아침이 하루를 만들어요.</div>
+  </div>
+
+  <!-- JAZZ PLAYER -->
+  <div class="section-label" style="margin-top:4px;">재즈 플레이어 🎷</div>
+  <div class="jazz-card">
+    <div class="jazz-header">
+      <div class="jazz-title-row">
+        <div class="jazz-vinyl" id="jazzVinyl"></div>
+        <div class="jazz-info">
+          <div class="jazz-track-name" id="jazzTrackName">Loading…</div>
+          <div class="jazz-genre">☕ Lo-fi Jazz · Morning Shuffle</div>
+        </div>
+      </div>
+      <div class="shuffle-badge" id="shuffleBadge">🔀 오늘의 플레이리스트</div>
+    </div>
+
+    <!-- SoundCloud Widget -->
+    <div class="sc-wrap">
+      <iframe id="scFrame"
+        scrolling="no"
+        frameborder="no"
+        allow="autoplay"
+        style="width:100%;height:166px;border-radius:12px;margin-top:12px;"
+        src="">
+      </iframe>
+    </div>
+
+    <div class="jazz-playlist-row" id="playlistRow"></div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <div class="checklist" id="checklist"></div>
+
+  <!-- QUOTE -->
+  <div class="quote-card">
+    <div class="quote-text" id="quoteText">아침은 하루 중 가장 조용한 선물이에요.</div>
+    <div class="quote-author" id="quoteAuthor">— LUMA Morning</div>
+  </div>
+
+</div>
+
+<!-- BOTTOM TAB -->
+<div class="bottom-tab">
+  <div class="tab-item active">
+    <span class="tab-icon">☀️</span>
+    <span class="tab-label">오늘</span>
+  </div>
+  <div class="tab-item">
+    <span class="tab-icon">📊</span>
+    <span class="tab-label">기록</span>
+  </div>
+  <div class="tab-item">
+    <span class="tab-icon">⚙️</span>
+    <span class="tab-label">설정</span>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+const ALARM_TIME = '08:30';
+let alarmOn = true;
+let alarmFired = false;
+
+const CHECKLIST_ITEMS = [
+  { id: 'wake',    icon: '⏰', title: '기상 확인',          sub: '08:30에 일어났나요?',          time: '08:30' },
+  { id: 'blind',   icon: '🌅', title: '커튼 / 블라인드 열기', sub: '햇빛을 바로 맞이하세요',       time: '08:31' },
+  { id: 'water',   icon: '💧', title: '물 한 잔',            sub: '공복에 미지근한 물 200ml',      time: '08:35' },
+  { id: 'stretch', icon: '🧘', title: '스트레칭 5분',        sub: '목, 어깨, 허리 가볍게',        time: '08:40' },
+  { id: 'walk',    icon: '🚶', title: '야외 산책',            sub: '햇빛 속 10~20분 걷기',         time: '09:00' },
+  { id: 'sun',     icon: '☀️', title: '햇빛 노출 확인',      sub: '눈에 자연광이 닿았나요?',      time: '09:20' },
+  { id: 'reading', icon: '📖', title: '독서',                sub: '하루 10~20분, 한 챕터씩',      time: '09:30' },
+];
+
+const QUOTES = [
+  { text: '아침은 하루 중 가장 조용한 선물이에요.', author: '— LUMA Morning' },
+  { text: '햇빛 한 줌이 하루의 방향을 정해요.', author: '— LUMA Morning' },
+  { text: '루틴은 자유를 만드는 구조예요.', author: '— Mason Currey' },
+  { text: '일어나는 것만으로도 이미 절반은 성공했어요.', author: '— LUMA Morning' },
+  { text: '작은 아침 의식이 삶의 결을 바꿔요.', author: '— LUMA Morning' },
+];
+
+// ── STORAGE ──
+const TODAY = new Date().toDateString();
+let checked = JSON.parse(localStorage.getItem('luma_checked_' + TODAY) || '{}');
+let streak = parseInt(localStorage.getItem('luma_streak') || '0');
+let lastDone = localStorage.getItem('luma_last_done');
+
+// ── CLOCK ──
+function updateClock() {
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2,'0');
+  const mm = String(now.getMinutes()).padStart(2,'0');
+  const ss = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('clockHM').textContent = hh + ':' + mm;
+  document.getElementById('clockS').textContent = ':' + ss;
+
+  // Update date
+  const days = ['일','월','화','수','목','금','토'];
+  const months = ['1','2','3','4','5','6','7','8','9','10','11','12'];
+  document.getElementById('dateDay').textContent = now.getDate();
+  document.getElementById('dateInfo').textContent = days[now.getDay()] + '요일 · ' + months[now.getMonth()] + '월';
+
+  // Countdown
+  const [ah, am] = ALARM_TIME.split(':').map(Number);
+  const alarmDate = new Date(now);
+  alarmDate.setHours(ah, am, 0, 0);
+  if (alarmDate <= now) alarmDate.setDate(alarmDate.getDate() + 1);
+  const diff = alarmDate - now;
+  const dh = Math.floor(diff / 3600000);
+  const dm = Math.floor((diff % 3600000) / 60000);
+  const ds = Math.floor((diff % 60000) / 1000);
+  if (dh > 0) {
+    document.getElementById('countdown').textContent = dh + '시간 ' + dm + '분';
+  } else if (dm > 0) {
+    document.getElementById('countdown').textContent = dm + '분 ' + ds + '초';
+  } else {
+    document.getElementById('countdown').textContent = ds + '초';
+  }
+
+  // Check alarm
+  if (alarmOn && !alarmFired && hh + ':' + mm === ALARM_TIME && ss === '00') {
+    triggerAlarm();
+  }
+}
+
+// ── ALARM ──
+function toggleAlarm() {
+  alarmOn = !alarmOn;
+  document.getElementById('alarmToggle').classList.toggle('on', alarmOn);
+}
+
+function triggerAlarm() {
+  alarmFired = true;
+  document.getElementById('alarmRingTime').textContent = ALARM_TIME;
+  document.getElementById('alarmOverlay').classList.add('show');
+  // Try vibration
+  if (navigator.vibrate) navigator.vibrate([500,200,500,200,500]);
+}
+
+function dismissAlarm() {
+  document.getElementById('alarmOverlay').classList.remove('show');
+  // Auto-check wake
+  if (!checked['wake']) {
+    checked['wake'] = true;
+    saveAndRender();
+  }
+}
+
+// ── WEATHER (GPS 기반) ──
+let gpsLocationName = '내 위치';
+
+async function loadWeather() {
+  showWeatherLoading();
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        await fetchWeatherData(lat, lon);
+        await reverseGeocode(lat, lon);
+      },
+      async () => {
+        // GPS 거부 시 용인 기본값
+        await fetchWeatherData(37.2411, 127.1776);
+        gpsLocationName = '용인시, 경기도';
+        renderWeather(lastWeatherData);
+      },
+      { timeout: 8000 }
+    );
+  } else {
+    await fetchWeatherData(37.2411, 127.1776);
+    gpsLocationName = '용인시, 경기도';
+    renderWeather(lastWeatherData);
+  }
+}
+
+let lastWeatherData = null;
+
+function showWeatherLoading() {
+  document.getElementById('weatherLeft').innerHTML = `
+    <div class="weather-location" id="gpsLocName">📍 위치 감지 중…</div>
+    <div class="weather-loading">날씨 불러오는 중…</div>
+  `;
+  document.getElementById('weatherRight').innerHTML = '';
+}
+
+async function fetchWeatherData(lat, lon) {
+  try {
+    const res = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode,windspeed_10m,relativehumidity_2m,apparent_temperature&timezone=Asia%2FSeoul`
+    );
+    lastWeatherData = await res.json();
+    renderWeather(lastWeatherData);
+  } catch (e) {
+    document.getElementById('weatherLeft').innerHTML = `
+      <div class="weather-location">📍 ${gpsLocationName}</div>
+      <div class="weather-temp">—<sup>°C</sup></div>
+      <div class="weather-desc">날씨 정보를 불러올 수 없어요</div>
+    `;
+  }
+}
+
+async function reverseGeocode(lat, lon) {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ko`
+    );
+    const data = await res.json();
+    const addr = data.address;
+    // 시/군/구 + 시/도 조합
+    const city = addr.city || addr.town || addr.county || addr.municipality || '';
+    const state = addr.province || addr.state || '';
+    gpsLocationName = [city, state].filter(Boolean).join(', ') || '내 위치';
+    renderWeather(lastWeatherData);
+  } catch (e) {
+    // geocode 실패해도 날씨는 유지
+    renderWeather(lastWeatherData);
+  }
+}
+
+function renderWeather(data) {
+  if (!data) return;
+  const c = data.current;
+  const temp = Math.round(c.temperature_2m);
+  const feels = Math.round(c.apparent_temperature);
+  const code = c.weathercode;
+  const wind = Math.round(c.windspeed_10m);
+  const hum = c.relativehumidity_2m;
+
+  const weatherInfo = getWeatherInfo(code);
+  const goodForWalk = code < 50 && temp > 5 && temp < 35;
+
+  document.getElementById('weatherLeft').innerHTML = `
+    <div class="weather-location">📍 ${gpsLocationName}</div>
+    <div class="weather-temp">${temp}<sup>°C</sup></div>
+    <div class="weather-desc">${weatherInfo.desc} · 체감 ${feels}°</div>
+    <div class="outdoor-badge ${goodForWalk ? 'good' : 'caution'}">
+      ${goodForWalk ? '✓ 산책하기 좋아요' : '⚠ 야외 주의'}
+    </div>
+  `;
+
+  document.getElementById('weatherRight').innerHTML = `
+    <span class="weather-icon">${weatherInfo.icon}</span>
+    <div class="weather-detail">
+      바람 ${wind} km/h<br>
+      습도 ${hum}%
+    </div>
+  `;
+}
+
+function getWeatherInfo(code) {
+  if (code === 0) return { icon: '☀️', desc: '맑음' };
+  if (code <= 2) return { icon: '🌤', desc: '구름 조금' };
+  if (code <= 3) return { icon: '☁️', desc: '흐림' };
+  if (code <= 49) return { icon: '🌫', desc: '안개' };
+  if (code <= 59) return { icon: '🌦', desc: '이슬비' };
+  if (code <= 69) return { icon: '🌧', desc: '비' };
+  if (code <= 79) return { icon: '❄️', desc: '눈' };
+  if (code <= 84) return { icon: '🌧', desc: '소나기' };
+  if (code <= 99) return { icon: '⛈', desc: '뇌우' };
+  return { icon: '🌡', desc: '날씨 확인 중' };
+}
+
+// ── CHECKLIST ──
+function renderChecklist() {
+  const container = document.getElementById('checklist');
+  container.innerHTML = CHECKLIST_ITEMS.map(item => `
+    <div class="check-item ${checked[item.id] ? 'done' : ''}" onclick="toggleCheck('${item.id}')">
+      <div class="check-box">
+        <span class="check-box-inner">✓</span>
+      </div>
+      <span class="check-icon">${item.icon}</span>
+      <div class="check-content">
+        <div class="check-title">${item.title}</div>
+        <div class="check-sub">${item.sub}</div>
+      </div>
+      <div class="check-time">${item.time}</div>
+    </div>
+  `).join('');
+
+  const done = Object.values(checked).filter(Boolean).length;
+  const total = CHECKLIST_ITEMS.length;
+  const pct = Math.round((done / total) * 100);
+
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+
+  // Complete banner
+  const banner = document.getElementById('completeBanner');
+  if (pct === 100) {
+    banner.classList.add('show');
+    // Update streak
+    if (lastDone !== TODAY) {
+      streak++;
+      localStorage.setItem('luma_streak', streak);
+      localStorage.setItem('luma_last_done', TODAY);
+      lastDone = TODAY;
+      renderStreak();
+    }
+  } else {
+    banner.classList.remove('show');
+  }
+}
+
+function toggleCheck(id) {
+  checked[id] = !checked[id];
+  saveAndRender();
+}
+
+function saveAndRender() {
+  localStorage.setItem('luma_checked_' + TODAY, JSON.stringify(checked));
+  renderChecklist();
+}
+
+function resetChecklist() {
+  if (confirm('오늘 루틴을 초기화할까요?')) {
+    checked = {};
+    localStorage.removeItem('luma_checked_' + TODAY);
+    renderChecklist();
+  }
+}
+
+// ── STREAK DOTS ──
+function renderStreak() {
+  document.getElementById('streakNum').textContent = streak;
+  const days = ['일','월','화','수','목','금','토'];
+  const now = new Date();
+  const dotsHtml = Array.from({length: 7}, (_, i) => {
+    const d = new Date(now);
+    d.setDate(d.getDate() - (6 - i));
+    const isToday = d.toDateString() === TODAY;
+    const dayLabel = days[d.getDay()];
+    // Simulate past completions based on streak
+    const pastDone = i < 6 && i >= (6 - streak);
+    const todayDone = isToday && Object.values(checked).filter(Boolean).length === CHECKLIST_ITEMS.length;
+    const isDone = pastDone || todayDone;
+    return `
+      <div class="streak-dot ${isDone ? 'done' : ''}">
+        ${isDone ? '<div class="dot-inner"></div>' : ''}
+        <span class="dot-day">${dayLabel}</span>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('streakDots').innerHTML = dotsHtml;
+}
+
+// ── QUOTE ──
+function renderQuote() {
+  const q = QUOTES[new Date().getDay() % QUOTES.length];
+  document.getElementById('quoteText').textContent = q.text;
+  document.getElementById('quoteAuthor').textContent = q.author;
+}
+
+// ── INIT ──
+document.getElementById('alarmToggle').classList.add('on');
+setInterval(updateClock, 1000);
+updateClock();
+loadWeather();
+renderChecklist();
+renderStreak();
+renderQuote();
+
+
+// ── JAZZ PLAYER (SoundCloud Widget) ──
+// 검증된 공개 SoundCloud 채널/플레이리스트
+const BASE = 'https://w.soundcloud.com/player/?color=%23C8994A&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false';
+
+const SC_PLAYLISTS = [
+  {
+    name: '🎷 Jazz Lofi — Lofi Girl',
+    url: `${BASE}&url=https%3A//soundcloud.com/lofi_girl/sets/jazz-lofi`
+  },
+  {
+    name: '🎸 Lofi Jazz Hop',
+    url: `${BASE}&url=https%3A//soundcloud.com/chill-playlister/sets/lofi-jazz-hop-lo-fi-beats`
+  },
+  {
+    name: '☕ Chillhop Jazz Radio',
+    url: `${BASE}&url=https%3A//soundcloud.com/komplextrus/sets/chillhop-radio-jazz-lofi-hip`
+  },
+  {
+    name: '🎵 No Copyright Lofi Jazz',
+    url: `${BASE}&url=https%3A//soundcloud.com/minjee-kang-51559651/sets/no-copyright-lofi-jazz`
+  },
+  {
+    name: '💿 Jazz Hop Café Mix',
+    url: `${BASE}&url=https%3A//soundcloud.com/jazzhopcafe/record-shop-jazz-hop-lofi-chill-mix`
+  },
+  {
+    name: '🌅 LoFi Covers Morning',
+    url: `${BASE}&url=https%3A//soundcloud.com/riki-lion-44709235/sets/lofi-cover-of-popular-song`
+  },
+];
+
+// 페이지 열 때마다 랜덤 셔플 (Math.random 기반 — 매번 다름)
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+const SHUFFLED_PLAYLISTS = shuffleArray(SC_PLAYLISTS);
+let currentPLIdx = 0;
+
+function initJazz() {
+  loadPlaylist(0);
+  renderPlaylistChips();
+  setTimeout(() => document.getElementById('jazzVinyl').classList.add('spinning'), 800);
+}
+
+function loadPlaylist(idx) {
+  currentPLIdx = idx;
+  const pl = SHUFFLED_PLAYLISTS[idx];
+  document.getElementById('jazzTrackName').textContent = pl.name;
+  // auto_play=true 로 바로 재생 시도
+  document.getElementById('scFrame').src = pl.url + '&auto_play=true';
+  renderPlaylistChips();
+}
+
+function renderPlaylistChips() {
+  const row = document.getElementById('playlistRow');
+  row.innerHTML = SHUFFLED_PLAYLISTS.map((pl, i) => `
+    <button class="pl-chip ${i === currentPLIdx ? 'active' : ''}" onclick="loadPlaylist(${i})">
+      ${pl.name}
+    </button>
+  `).join('');
+}
+
+function nextPlaylist() {
+  loadPlaylist((currentPLIdx + 1) % SHUFFLED_PLAYLISTS.length);
+}
+
+
+initJazz();
+
+// Refresh weather every 15 minutes
+setInterval(loadWeather, 900000);
+</script>
+</body>
+</html>
