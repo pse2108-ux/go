@@ -3,1299 +3,702 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SE's Morning Routine</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<title>Coffee Career Tracker</title>
 <style>
-  :root {
-    --bg: #0D0B08;
-    --surface: #161310;
-    --surface2: #1E1A15;
-    --border: rgba(255,255,255,0.06);
-    --cream: #F0EAD8;
-    --gold: #C8994A;
-    --gold-dim: rgba(200,153,74,0.15);
-    --rose: #C4714A;
-    --muted: rgba(240,234,216,0.4);
-    --green: #7A9A6A;
-    --green-dim: rgba(122,154,106,0.15);
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--cream);
-    font-family: 'Noto Sans KR', sans-serif;
-    min-height: 100vh;
-    font-weight: 300;
-    overflow-x: hidden;
-  }
-
-  /* Subtle grain overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 1000;
-    opacity: 0.6;
-  }
-
-  .app {
-    max-width: 420px;
-    margin: 0 auto;
-    padding: 40px 20px 100px;
-    position: relative;
-  }
-
-  /* ── HEADER ── */
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 36px;
-  }
-
-  .brand {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 22px;
-    font-weight: 300;
-    letter-spacing: 0.3em;
-    color: var(--gold);
-    text-transform: uppercase;
-  }
-
-  .brand-sub {
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    color: var(--muted);
-    margin-top: 4px;
-    text-transform: uppercase;
-  }
-
-  .date-block {
-    text-align: right;
-  }
-
-  .date-day {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 48px;
-    font-weight: 300;
-    line-height: 1;
-    color: var(--cream);
-    font-style: italic;
-  }
-
-  .date-info {
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-    margin-top: 4px;
-  }
-
-  /* ── CLOCK SECTION ── */
-  .clock-section {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 32px;
-    margin-bottom: 16px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .clock-section::before {
-    content: '';
-    position: absolute;
-    top: -40px; right: -40px;
-    width: 160px; height: 160px;
-    background: radial-gradient(circle, rgba(200,153,74,0.08), transparent 70%);
-    border-radius: 50%;
-  }
-
-  .current-time {
-    font-family: 'DM Mono', monospace;
-    font-size: 64px;
-    font-weight: 300;
-    letter-spacing: -0.02em;
-    color: var(--cream);
-    line-height: 1;
-    margin-bottom: 8px;
-  }
-
-  .current-time .seconds {
-    font-size: 32px;
-    color: var(--muted);
-    vertical-align: middle;
-  }
-
-  .alarm-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid var(--border);
-  }
-
-  .alarm-label {
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
-
-  .alarm-time-display {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .alarm-time {
-    font-family: 'DM Mono', monospace;
-    font-size: 28px;
-    font-weight: 300;
-    color: var(--gold);
-    letter-spacing: 0.05em;
-  }
-
-  .alarm-toggle {
-    width: 44px; height: 24px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    cursor: pointer;
-    position: relative;
-    transition: background 0.3s;
-  }
-
-  .alarm-toggle.on { background: var(--gold); border-color: var(--gold); }
-
-  .alarm-toggle::after {
-    content: '';
-    position: absolute;
-    width: 18px; height: 18px;
-    background: var(--cream);
-    border-radius: 50%;
-    top: 2px; left: 3px;
-    transition: transform 0.3s;
-  }
-
-  .alarm-toggle.on::after { transform: translateX(20px); }
-
-  /* Countdown badge */
-  .countdown-badge {
-    margin-top: 12px;
-    font-size: 12px;
-    color: var(--muted);
-    letter-spacing: 0.05em;
-  }
-
-  .countdown-badge span {
-    color: var(--gold);
-    font-family: 'DM Mono', monospace;
-  }
-
-  /* ── WEATHER ── */
-  .weather-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 24px 28px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .weather-card::before {
-    content: '';
-    position: absolute;
-    bottom: -20px; right: -20px;
-    width: 120px; height: 120px;
-    background: radial-gradient(circle, rgba(122,154,106,0.07), transparent 70%);
-    border-radius: 50%;
-  }
-
-  .weather-left {}
-
-  .weather-location {
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .weather-location::before {
-    content: '◎';
-    color: var(--green);
-    font-size: 8px;
-  }
-
-  .weather-temp {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 52px;
-    font-weight: 300;
-    line-height: 1;
-    color: var(--cream);
-  }
-
-  .weather-temp sup {
-    font-size: 20px;
-    vertical-align: top;
-    margin-top: 8px;
-    display: inline-block;
-    color: var(--muted);
-  }
-
-  .weather-desc {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 6px;
-    letter-spacing: 0.05em;
-  }
-
-  .weather-right {
-    text-align: right;
-  }
-
-  .weather-icon {
-    font-size: 48px;
-    line-height: 1;
-    margin-bottom: 8px;
-    display: block;
-    filter: drop-shadow(0 0 12px rgba(200,153,74,0.3));
-  }
-
-  .weather-detail {
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 0.05em;
-    line-height: 1.8;
-  }
-
-  .weather-loading {
-    font-size: 12px;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-    animation: pulse 1.5s ease-in-out infinite;
-  }
-
-  /* Outdoor suggestion */
-  .outdoor-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 10px;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    letter-spacing: 0.08em;
-  }
-
-  .outdoor-badge.good { background: var(--green-dim); color: var(--green); border: 1px solid rgba(122,154,106,0.2); }
-  .outdoor-badge.caution { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(200,153,74,0.2); }
-
-  /* ── STREAK ── */
-  .streak-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 24px 28px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .streak-number {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 64px;
-    font-weight: 300;
-    font-style: italic;
-    color: var(--gold);
-    line-height: 1;
-  }
-
-  .streak-label {
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-top: 4px;
-  }
-
-  .streak-dots {
-    display: flex;
-    gap: 6px;
-  }
-
-  .streak-dot {
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 9px;
-    color: var(--muted);
-    letter-spacing: 0;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .streak-dot.done { background: var(--gold-dim); border-color: var(--gold); }
-  .streak-dot.done .dot-inner { background: var(--gold); border-radius: 50%; width: 8px; height: 8px; }
-  .streak-dot .dot-day { font-size: 8px; color: var(--muted); }
-
-  /* ── CHECKLIST ── */
-  .section-label {
-    font-size: 10px;
-    letter-spacing: 0.25em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 12px;
-    padding-left: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .section-label .reset-btn {
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    color: var(--muted);
-    cursor: pointer;
-    background: none;
-    border: none;
-    color: inherit;
-    font-family: inherit;
-    opacity: 0.6;
-    transition: opacity 0.2s;
-    text-transform: uppercase;
-  }
-
-  .section-label .reset-btn:hover { opacity: 1; color: var(--rose); }
-
-  .checklist {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    overflow: hidden;
-    margin-bottom: 16px;
-  }
-
-  .check-item {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 18px 24px;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    transition: background 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .check-item:last-child { border-bottom: none; }
-  .check-item:hover { background: rgba(255,255,255,0.02); }
-
-  .check-item.done { opacity: 0.5; }
-
-  .check-item.done::after {
-    content: '';
-    position: absolute;
-    left: 24px; right: 24px;
-    top: 50%; height: 1px;
-    background: var(--muted);
-  }
-
-  .check-box {
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: all 0.2s;
-    background: var(--surface2);
-  }
-
-  .check-item.done .check-box {
-    background: var(--gold);
-    border-color: var(--gold);
-  }
-
-  .check-box-inner {
-    font-size: 10px;
-    color: var(--bg);
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-
-  .check-item.done .check-box-inner { opacity: 1; }
-
-  .check-icon {
-    font-size: 18px;
-    width: 28px;
-    text-align: center;
-    flex-shrink: 0;
-  }
-
-  .check-content { flex: 1; }
-
-  .check-title {
-    font-size: 14px;
-    font-weight: 400;
-    color: var(--cream);
-    letter-spacing: 0.02em;
-  }
-
-  .check-sub {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 3px;
-    letter-spacing: 0.03em;
-  }
-
-  .check-time {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    flex-shrink: 0;
-  }
-
-  /* Progress bar */
-  .progress-wrap {
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .progress-bar {
-    flex: 1;
-    height: 2px;
-    background: var(--surface2);
-    border-radius: 1px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: var(--gold);
-    border-radius: 1px;
-    transition: width 0.5s ease;
-  }
-
-  .progress-pct {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--gold);
-    min-width: 32px;
-    text-align: right;
-  }
-
-  /* ── MOTIVATIONAL QUOTE ── */
-  .quote-card {
-    background: linear-gradient(135deg, var(--surface) 0%, rgba(200,153,74,0.05) 100%);
-    border: 1px solid rgba(200,153,74,0.15);
-    border-radius: 20px;
-    padding: 28px;
-    margin-bottom: 16px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .quote-card::before {
-    content: '"';
-    position: absolute;
-    top: -10px; left: 20px;
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 120px;
-    font-style: italic;
-    color: rgba(200,153,74,0.08);
-    line-height: 1;
-    pointer-events: none;
-  }
-
-  .quote-text {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 20px;
-    font-style: italic;
-    font-weight: 300;
-    line-height: 1.6;
-    color: var(--cream);
-    position: relative;
-    margin-bottom: 12px;
-  }
-
-  .quote-author {
-    font-size: 11px;
-    color: var(--gold);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-  }
-
-  /* ── COMPLETE STATE ── */
-  .complete-banner {
-    background: linear-gradient(135deg, var(--green-dim), rgba(122,154,106,0.05));
-    border: 1px solid rgba(122,154,106,0.2);
-    border-radius: 20px;
-    padding: 28px;
-    text-align: center;
-    margin-bottom: 16px;
-    display: none;
-  }
-
-  .complete-banner.show { display: block; }
-
-  .complete-emoji { font-size: 40px; margin-bottom: 12px; }
-
-  .complete-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 28px;
-    font-style: italic;
-    color: var(--green);
-    margin-bottom: 8px;
-  }
-
-  .complete-sub {
-    font-size: 12px;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-    line-height: 1.8;
-  }
-
-  /* ── JAZZ PLAYER (SoundCloud) ── */
-  .jazz-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 20px 24px 24px;
-    margin-bottom: 16px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .jazz-card::before {
-    content: '';
-    position: absolute;
-    top: -30px; left: -30px;
-    width: 140px; height: 140px;
-    background: radial-gradient(circle, rgba(200,153,74,0.06), transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
-  }
-
-  .jazz-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 4px;
-  }
-
-  .jazz-title-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .jazz-vinyl {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    background: conic-gradient(#1a1a1a 0deg, #2a2520 60deg, #1a1a1a 120deg, #2a2520 180deg, #1a1a1a 240deg, #2a2520 300deg, #1a1a1a 360deg);
-    border: 2px solid rgba(200,153,74,0.3);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .jazz-vinyl::after {
-    content: '';
-    width: 8px; height: 8px;
-    background: var(--gold);
-    border-radius: 50%;
-    position: absolute;
-  }
-
-  @keyframes vinylSpin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
-  }
-
-  .jazz-vinyl.spinning { animation: vinylSpin 3s linear infinite; }
-
-  .jazz-info {}
-  .jazz-track-name {
-    font-size: 13px; font-weight: 400;
-    color: var(--cream); letter-spacing: 0.02em;
-  }
-  .jazz-genre {
-    font-size: 10px; color: var(--gold);
-    letter-spacing: 0.15em; text-transform: uppercase; margin-top: 2px;
-  }
-
-  .shuffle-badge {
-    font-size: 10px; letter-spacing: 0.1em;
-    color: var(--gold); background: var(--gold-dim);
-    border: 1px solid rgba(200,153,74,0.2);
-    padding: 4px 10px; border-radius: 20px;
-    white-space: nowrap;
-  }
-
-  .sc-wrap { position: relative; }
-
-  /* hide SC branding bar a bit */
-  .sc-wrap iframe { display: block; }
-
-  .jazz-playlist-row {
-    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px;
-  }
-
-  .pl-chip {
-    font-size: 10px; letter-spacing: 0.08em;
-    padding: 5px 12px; border-radius: 20px;
-    border: 1px solid var(--border);
-    color: var(--muted); cursor: pointer;
-    transition: all 0.2s; background: none;
-    font-family: 'Noto Sans KR', sans-serif;
-  }
-  .pl-chip:hover { border-color: var(--gold); color: var(--gold); }
-  .pl-chip.active { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
-
-
-
-  @keyframes ring {
-    0%, 100% { transform: rotate(0deg); }
-    10%, 30%, 50%, 70%, 90% { transform: rotate(-8deg); }
-    20%, 40%, 60%, 80% { transform: rotate(8deg); }
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .alarm-ring-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(13,11,8,0.95);
-    z-index: 500;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 24px;
-    display: none;
-  }
-
-  .alarm-ring-overlay.show { display: flex; animation: slideUp 0.4s ease; }
-
-  .alarm-bell {
-    font-size: 72px;
-    animation: ring 0.6s ease-in-out infinite;
-  }
-
-  .alarm-ring-time {
-    font-family: 'DM Mono', monospace;
-    font-size: 80px;
-    color: var(--gold);
-    font-weight: 300;
-    letter-spacing: -0.02em;
-  }
-
-  .alarm-ring-label {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 24px;
-    font-style: italic;
-    color: var(--cream);
-    letter-spacing: 0.1em;
-  }
-
-  .alarm-dismiss {
-    margin-top: 16px;
-    padding: 16px 48px;
-    background: var(--gold);
-    color: var(--bg);
-    border: none;
-    border-radius: 40px;
-    font-size: 13px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    cursor: pointer;
-    font-family: 'Noto Sans KR', sans-serif;
-    font-weight: 500;
-    transition: transform 0.1s;
-  }
-
-  .alarm-dismiss:hover { transform: scale(1.03); }
-
-  /* Bottom tab */
-  .bottom-tab {
-    position: fixed;
-    bottom: 0; left: 50%;
-    transform: translateX(-50%);
-    width: 100%; max-width: 420px;
-    padding: 16px 24px 28px;
-    background: linear-gradient(to top, var(--bg) 60%, transparent);
-    display: flex;
-    justify-content: space-around;
-    z-index: 100;
-  }
-
-  .tab-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-    opacity: 0.4;
-    transition: opacity 0.2s;
-  }
-
-  .tab-item.active { opacity: 1; }
-  .tab-item:hover { opacity: 0.8; }
-
-  .tab-icon { font-size: 20px; }
-
-  .tab-label {
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    color: var(--cream);
-    text-transform: uppercase;
-  }
-
-  .tab-item.active .tab-label { color: var(--gold); }
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@300;400;500&display=swap');
+
+:root {
+  --espresso:#1C1008; --roast:#3D1F0A; --roast2:#2e1608;
+  --caramel:#B5651D; --crema:#E8C98A; --steam:#F5EFE0;
+  --done:#4A7C59; --blue:#7ab0e0; --purple:#b07ae0; --green:#7ae0a0; --red:#e07a6a;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--espresso);font-family:'IBM Plex Sans KR',sans-serif;min-height:100vh;color:var(--steam);}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:32px 20px 80px;}
+
+/* HEADER */
+header{margin-bottom:36px;}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--caramel);margin-bottom:8px;}
+h1{font-family:'Playfair Display',serif;font-size:clamp(28px,6vw,44px);font-weight:700;color:var(--crema);line-height:1.1;}
+h1 span{color:var(--caramel);}
+.subtitle{margin-top:10px;font-size:14px;color:#a89070;font-weight:300;}
+.progress-wrap{margin:24px 0 32px;}
+.progress-label{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#a89070;margin-bottom:8px;}
+.progress-bar{height:4px;background:var(--roast);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--caramel),var(--crema));border-radius:2px;transition:width .5s ease;}
+
+/* TABS */
+.tabs{display:flex;gap:2px;margin-bottom:28px;border-bottom:1px solid var(--roast);overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab-btn{background:none;border:none;cursor:pointer;font-family:'IBM Plex Sans KR',sans-serif;font-size:13px;color:#a89070;padding:10px 14px;position:relative;transition:color .2s;white-space:nowrap;flex-shrink:0;}
+.tab-btn::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--caramel);transform:scaleX(0);transition:transform .2s;}
+.tab-btn.active{color:var(--crema);}
+.tab-btn.active::after{transform:scaleX(1);}
+.tab-btn:hover{color:var(--steam);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* SECTION */
+.section{margin-bottom:32px;}
+.section-title{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--caramel);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.section-title::after{content:'';flex:1;height:1px;background:var(--roast);}
+
+/* CHECKLIST */
+.checklist{display:flex;flex-direction:column;gap:8px;}
+.check-item{display:flex;align-items:flex-start;gap:12px;background:var(--roast);border-radius:10px;padding:14px 16px;cursor:pointer;transition:background .15s;border:1px solid transparent;}
+.check-item:hover{background:#4a2810;border-color:#5a3010;}
+.check-item.done{background:#0c1c10;border-color:#1e3a22;}
+.check-item.done .item-title{color:#5a8060;text-decoration:line-through;text-decoration-color:#4A7C59;}
+.check-item.done .item-desc{color:#3a5a40;}
+.checkbox{width:20px;height:20px;border-radius:4px;flex-shrink:0;border:1.5px solid #5a3a1a;background:transparent;display:flex;align-items:center;justify-content:center;transition:all .15s;margin-top:2px;}
+.check-item.done .checkbox{background:var(--done);border-color:var(--done);}
+.checkbox svg{display:none;}
+.check-item.done .checkbox svg{display:block;}
+.item-content{flex:1;}
+.item-title{font-size:14px;color:var(--steam);font-weight:500;line-height:1.4;margin-bottom:4px;}
+.item-desc{font-size:12px;color:#8a7060;line-height:1.6;}
+.item-meta{display:flex;align-items:center;gap:8px;margin-top:7px;flex-wrap:wrap;}
+.item-badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 8px;border-radius:20px;letter-spacing:.06em;}
+.badge-skill{background:#2a1a08;color:var(--caramel);border:1px solid #5a3010;}
+.badge-cert{background:#0e1a2a;color:var(--blue);border:1px solid #1a3a5a;}
+.badge-exp{background:#1a0e2a;color:var(--purple);border:1px solid #3a1a5a;}
+.item-tip{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#6a8060;background:#0a1a0c;border:1px solid #1a3020;padding:2px 8px;border-radius:4px;}
+
+/* LOG FORM */
+.log-form{background:var(--roast);border-radius:12px;padding:22px;margin-bottom:20px;}
+.log-form h3{font-size:14px;color:var(--crema);margin-bottom:16px;font-weight:500;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+@media(max-width:520px){.form-row{grid-template-columns:1fr;}}
+.form-row.full{grid-template-columns:1fr;}
+label{display:block;font-size:11px;color:#a89070;margin-bottom:4px;letter-spacing:.05em;}
+input,select,textarea{width:100%;background:var(--espresso);border:1px solid #3a2010;border-radius:6px;padding:9px 12px;font-family:'IBM Plex Sans KR',sans-serif;font-size:13px;color:var(--steam);outline:none;transition:border-color .15s;}
+input:focus,select:focus,textarea:focus{border-color:var(--caramel);}
+textarea{resize:vertical;min-height:70px;}
+select option{background:var(--espresso);}
+.btn{padding:10px 20px;border:none;border-radius:6px;cursor:pointer;font-family:'IBM Plex Sans KR',sans-serif;font-size:13px;font-weight:500;transition:all .15s;}
+.btn-primary{background:var(--caramel);color:var(--espresso);}
+.btn-primary:hover{background:var(--crema);}
+
+/* LOG ENTRIES */
+.log-entries{display:flex;flex-direction:column;gap:10px;}
+.log-entry{background:var(--roast);border-radius:10px;padding:16px 18px;border-left:3px solid #3a2010;position:relative;}
+.log-entry.rated-5{border-left-color:#e0a020;}
+.log-entry.rated-4{border-left-color:var(--caramel);}
+.log-entry.rated-3{border-left-color:#8a6030;}
+.log-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;padding-right:80px;}
+.log-origin{font-size:15px;font-weight:500;color:var(--crema);}
+.log-method{font-family:'IBM Plex Mono',monospace;font-size:10px;background:#2a1a08;color:var(--caramel);padding:2px 8px;border-radius:20px;}
+.log-date{font-size:11px;color:#7a6040;}
+.log-stars{color:#c08030;font-size:13px;margin-bottom:5px;}
+.log-note{font-size:13px;color:#a89070;line-height:1.5;}
+.log-params{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap;}
+.log-param{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#7a6040;}
+.log-param span{color:#c09060;}
+
+/* DELETE BUTTON — clear, accessible */
+.delete-btn{
+  position:absolute;top:14px;right:14px;
+  display:flex;align-items:center;gap:5px;
+  background:#2c0f0a;border:1px solid #7a2a18;border-radius:6px;
+  cursor:pointer;color:#e07060;font-family:'IBM Plex Sans KR',sans-serif;
+  font-size:12px;font-weight:500;padding:5px 11px;
+  transition:all .18s;line-height:1;
+}
+.delete-btn:hover{background:#5a1a0e;border-color:#e05030;color:#fff;}
+.delete-btn svg{flex-shrink:0;}
+
+.empty-state{text-align:center;padding:48px;color:#5a4030;}
+.empty-state .icon{font-size:36px;margin-bottom:10px;}
+.empty-state p{font-size:13px;}
+
+/* PICKS */
+.update-badge{display:inline-flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--done);background:#0c1c10;border:1px solid #1e4025;padding:3px 10px;border-radius:20px;margin-top:10px;}
+.update-badge::before{content:'●';font-size:8px;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.picks-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:560px){.picks-grid{grid-template-columns:1fr;}}
+.pick-card{background:var(--roast);border-radius:12px;padding:18px;border:1px solid #3a2010;position:relative;overflow:hidden;transition:border-color .2s;}
+.pick-card:hover{border-color:#5a3010;}
+.pick-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.pick-card.type-cafe::before{background:linear-gradient(90deg,#c08030,#e0b060);}
+.pick-card.type-bean::before{background:linear-gradient(90deg,#5090c0,#80c0e0);}
+.pick-card.type-roaster::before{background:linear-gradient(90deg,#8050c0,#b080e0);}
+.pick-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;}
+.type-cafe .pick-label{color:#c09040;}
+.type-bean .pick-label{color:var(--blue);}
+.type-roaster .pick-label{color:var(--purple);}
+.pick-name{font-family:'Playfair Display',serif;font-size:16px;color:var(--crema);margin-bottom:6px;line-height:1.2;}
+.pick-loc{font-size:11px;color:#a89070;margin-bottom:10px;}
+.pick-desc{font-size:12px;color:#9a8070;line-height:1.65;}
+.pick-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;}
+.pick-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 8px;border-radius:20px;background:#2a1a08;color:#a89060;border:1px solid #3a2510;}
+.bean-spotlight{background:linear-gradient(135deg,#1a0e28,#0e1a28);border:1px solid #3a2a5a;border-radius:12px;padding:22px;margin-bottom:24px;position:relative;overflow:hidden;}
+.bean-spotlight::after{content:'이 달의 원두';position:absolute;top:14px;right:16px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:#7060a0;text-transform:uppercase;}
+.bean-spot-name{font-family:'Playfair Display',serif;font-size:22px;color:var(--crema);margin-bottom:4px;}
+.bean-spot-sub{font-size:12px;color:#8a70b0;margin-bottom:14px;}
+.bean-spot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:450px){.bean-spot-grid{grid-template-columns:1fr 1fr;}}
+.bean-stat{background:#1a1228;border-radius:8px;padding:10px 12px;}
+.bean-stat-label{font-family:'IBM Plex Mono',monospace;font-size:9px;color:#7060a0;letter-spacing:.08em;margin-bottom:4px;}
+.bean-stat-val{font-size:13px;color:var(--steam);font-weight:500;}
+
+/* NEWSLETTER */
+.nl-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:24px;flex-wrap:wrap;}
+.nl-title-block h2{font-family:'Playfair Display',serif;font-size:22px;color:var(--crema);}
+.nl-title-block p{font-size:12px;color:#a89070;margin-top:5px;line-height:1.6;}
+.nl-meta-row{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;}
+.nl-date-chip{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--caramel);background:#2a1a08;border:1px solid #5a3010;padding:3px 10px;border-radius:20px;}
+.nl-src-chip{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--green);background:#0c1c10;border:1px solid #1e4025;padding:3px 10px;border-radius:20px;}
+
+.nl-card{background:var(--roast);border-radius:12px;padding:20px;margin-bottom:12px;border:1px solid #3a2010;position:relative;}
+.nl-cat{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;padding:2px 9px;border-radius:20px;display:inline-block;margin-bottom:10px;}
+.nl-cat.origin{background:#0e1a2a;color:var(--blue);border:1px solid #1a3050;}
+.nl-cat.trend{background:#2a1a08;color:var(--caramel);border:1px solid #5a3010;}
+.nl-cat.farm{background:#0c1e10;color:var(--green);border:1px solid #1a4020;}
+.nl-cat.market{background:#1a0e28;color:var(--purple);border:1px solid #3a1a5a;}
+.nl-cat.event{background:#1a0c0a;color:var(--red);border:1px solid #4a1a18;}
+.nl-card h3{font-family:'Playfair Display',serif;font-size:17px;color:var(--crema);margin-bottom:8px;line-height:1.3;}
+.nl-card .nl-body{font-size:13px;color:#a08070;line-height:1.75;}
+.nl-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap;gap:8px;}
+.nl-source-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#6a5040;}
+
+/* AI insight box */
+.ai-insight{margin-top:10px;padding:10px 14px;background:#0a1a14;border:1px solid #1a3a28;border-radius:6px;font-size:12px;color:#7ab090;line-height:1.65;position:relative;}
+.ai-insight::before{content:'AI 코멘트';font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--done);display:block;margin-bottom:4px;}
+.ai-loading{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:#5a8060;}
+.ai-loading::after{content:'';width:10px;height:10px;border:1.5px solid #2a5030;border-top-color:var(--done);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+.ai-insight.is-error{background:#1a0e0c;border-color:#3a1a15;color:#c08070;}
+.ai-insight.is-error::before{color:var(--red);content:'AI 코멘트 — 오류';}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.nl-load-btn{
+  background:linear-gradient(135deg,var(--caramel),#c87030);
+  color:var(--espresso);border:none;border-radius:8px;
+  font-family:'IBM Plex Sans KR',sans-serif;font-size:13px;font-weight:500;
+  padding:11px 20px;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;
+}
+.nl-load-btn:hover{background:linear-gradient(135deg,var(--crema),var(--caramel));transform:translateY(-1px);}
+.nl-load-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+.spinner-wrap{text-align:center;padding:60px 20px;color:#8a7060;}
+.spinner{width:32px;height:32px;border:2px solid #3a2010;border-top-color:var(--caramel);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px;}
 </style>
 </head>
 <body>
-
-<!-- ALARM OVERLAY -->
-<div class="alarm-ring-overlay" id="alarmOverlay">
-  <div class="alarm-bell">🔔</div>
-  <div class="alarm-ring-time" id="alarmRingTime">08:30</div>
-  <div class="alarm-ring-label">좋은 아침이에요 ☀️</div>
-  <button class="alarm-dismiss" onclick="dismissAlarm()">일어났어요</button>
-</div>
-
 <div class="app">
 
-  <!-- HEADER -->
-  <div class="header">
-    <div>
-      <div class="brand">SE's</div>
-      <div class="brand-sub">Morning Routine</div>
-    </div>
-    <div class="date-block">
-      <div class="date-day" id="dateDay">30</div>
-      <div class="date-info" id="dateInfo">토요일 · 5월</div>
-    </div>
-  </div>
-
-  <!-- CLOCK + ALARM -->
-  <div class="clock-section">
-    <div class="current-time">
-      <span id="clockHM">00:00</span><span class="seconds" id="clockS">:00</span>
-    </div>
-    <div class="alarm-row">
-      <div>
-        <div class="alarm-label">목표 기상</div>
-        <div class="countdown-badge" id="countdownText">알람까지 <span id="countdown">—</span></div>
-      </div>
-      <div class="alarm-time-display">
-        <div class="alarm-time">08:30</div>
-        <div class="alarm-toggle" id="alarmToggle" onclick="toggleAlarm()"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- WEATHER -->
-  <div class="weather-card">
-    <div class="weather-left" id="weatherLeft">
-      <div class="weather-location">수원, 경기도</div>
-      <div class="weather-loading">날씨 불러오는 중…</div>
-    </div>
-    <div class="weather-right" id="weatherRight"></div>
-  </div>
-
-  <!-- STREAK -->
-  <div class="streak-card">
-    <div>
-      <div class="streak-number" id="streakNum">0</div>
-      <div class="streak-label">연속 달성 🔥</div>
-    </div>
-    <div class="streak-dots" id="streakDots"></div>
-  </div>
-
-  <!-- PROGRESS -->
-  <div class="section-label">
-    오늘의 루틴
-    <button class="reset-btn" onclick="resetChecklist()">초기화</button>
-  </div>
+<header>
+  <div class="eyebrow">☕ Career Tracker</div>
+  <h1>My <span>Coffee</span> Journey</h1>
+  <p class="subtitle">핸드드립부터 커피 커리어까지 — 내 성장을 기록합니다</p>
   <div class="progress-wrap">
-    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-    <div class="progress-pct" id="progressPct">0%</div>
+    <div class="progress-label">
+      <span id="progress-text">진행도 계산 중...</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
   </div>
+</header>
 
-  <!-- COMPLETE BANNER -->
-  <div class="complete-banner" id="completeBanner">
-    <div class="complete-emoji">🌟</div>
-    <div class="complete-title">오늘 루틴 완성!</div>
-    <div class="complete-sub">모든 미션을 해냈어요.<br>당신의 아침이 하루를 만들어요.</div>
-  </div>
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('news',this)">📰 커피 뉴스레터</button>
+  <button class="tab-btn" onclick="switchTab('skills',this)">🎯 스킬 체크리스트</button>
+  <button class="tab-btn" onclick="switchTab('log',this)">📓 브루잉 로그</button>
+  <button class="tab-btn" onclick="switchTab('picks',this)">✨ 추천 카페 & 원두</button>
+</div>
 
-  <!-- JAZZ PLAYER -->
-  <div class="section-label" style="margin-top:4px;">재즈 플레이어 🎷</div>
-  <div class="jazz-card">
-    <div class="jazz-header">
-      <div class="jazz-title-row">
-        <div class="jazz-vinyl" id="jazzVinyl"></div>
-        <div class="jazz-info">
-          <div class="jazz-track-name" id="jazzTrackName">Loading…</div>
-          <div class="jazz-genre">☕ Lo-fi Jazz · Morning Shuffle</div>
-        </div>
+<!-- ═══ NEWS ══════════════════════════════════════ -->
+<div id="tab-news" class="tab-panel active">
+  <div class="nl-header">
+    <div class="nl-title-block">
+      <h2>Coffee Newsletter</h2>
+      <p>실제 업계 소식을 바탕으로 AI가 바리스타 관점의 코멘트를 달아드립니다</p>
+      <div class="nl-meta-row">
+        <span class="nl-date-chip">📅 2026년 6월 업데이트</span>
+        <span class="nl-src-chip">✓ Daily Coffee News · SCA · Perfect Daily Grind</span>
       </div>
-      <div class="shuffle-badge" id="shuffleBadge">🔀 오늘의 플레이리스트</div>
     </div>
-
-    <!-- SoundCloud Widget -->
-    <div class="sc-wrap">
-      <iframe id="scFrame"
-        scrolling="no"
-        frameborder="no"
-        allow="autoplay"
-        style="width:100%;height:166px;border-radius:12px;margin-top:12px;"
-        src="">
-      </iframe>
-    </div>
-
-    <div class="jazz-playlist-row" id="playlistRow"></div>
+    <button class="nl-load-btn" id="nl-btn" onclick="loadInsights()">✦ AI 코멘트 불러오기</button>
   </div>
-
-  <!-- CHECKLIST -->
-  <div class="checklist" id="checklist"></div>
-
-  <!-- QUOTE -->
-  <div class="quote-card">
-    <div class="quote-text" id="quoteText">아침은 하루 중 가장 조용한 선물이에요.</div>
-    <div class="quote-author" id="quoteAuthor">— LUMA Morning</div>
-  </div>
-
+  <div id="nl-content"></div>
 </div>
 
-<!-- BOTTOM TAB -->
-<div class="bottom-tab">
-  <div class="tab-item active">
-    <span class="tab-icon">☀️</span>
-    <span class="tab-label">오늘</span>
+<!-- ═══ SKILLS ═══════════════════════════════════ -->
+<div id="tab-skills" class="tab-panel">
+  <div class="section"><div class="section-title">핸드드립 기초</div><div class="checklist" id="cl-basic"></div></div>
+  <div class="section"><div class="section-title">추출 심화</div><div class="checklist" id="cl-advanced"></div></div>
+  <div class="section"><div class="section-title">감각 & 테이스팅</div><div class="checklist" id="cl-sensory"></div></div>
+  <div class="section"><div class="section-title">자격증 & 교육</div><div class="checklist" id="cl-cert"></div></div>
+  <div class="section"><div class="section-title">커리어 경험</div><div class="checklist" id="cl-career"></div></div>
+</div>
+
+<!-- ═══ LOG ══════════════════════════════════════ -->
+<div id="tab-log" class="tab-panel">
+  <div class="log-form">
+    <h3>+ 오늘의 브루잉 기록</h3>
+    <div class="form-row">
+      <div><label>원두 이름 / 원산지</label><input type="text" id="log-origin" placeholder="예: 에티오피아 예가체프 G1"></div>
+      <div><label>추출 방식</label>
+        <select id="log-method">
+          <option>V60</option><option>Kalita Wave</option><option>Chemex</option>
+          <option>Aeropress</option><option>Clever Dripper</option><option>Origami</option>
+          <option>Woodneck</option><option>기타</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div><label>원두량 (g)</label><input type="number" id="log-dose" placeholder="15"></div>
+      <div><label>물 양 (ml)</label><input type="number" id="log-water" placeholder="240"></div>
+    </div>
+    <div class="form-row">
+      <div><label>물 온도 (°C)</label><input type="number" id="log-temp" placeholder="92"></div>
+      <div><label>총 추출 시간</label><input type="text" id="log-time" placeholder="2분 30초"></div>
+    </div>
+    <div class="form-row">
+      <div><label>그라인드 세팅</label><input type="text" id="log-grind" placeholder="EK43 기준 8클릭"></div>
+      <div><label>평점</label>
+        <select id="log-rating">
+          <option value="5">★★★★★ 완벽</option>
+          <option value="4" selected>★★★★☆ 좋음</option>
+          <option value="3">★★★☆☆ 보통</option>
+          <option value="2">★★☆☆☆ 아쉬움</option>
+          <option value="1">★☆☆☆☆ 다음엔 다르게</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row full">
+      <div><label>테이스팅 노트 & 개선 메모</label>
+        <textarea id="log-note" placeholder="향, 맛, 개선점, 다음에 바꿔볼 것들..."></textarea>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="addLog()">기록 저장</button>
   </div>
-  <div class="tab-item">
-    <span class="tab-icon">📊</span>
-    <span class="tab-label">기록</span>
-  </div>
-  <div class="tab-item">
-    <span class="tab-icon">⚙️</span>
-    <span class="tab-label">설정</span>
+  <div class="log-entries" id="log-entries">
+    <div class="empty-state"><div class="icon">☕</div><p>첫 브루잉 기록을 남겨보세요</p></div>
   </div>
 </div>
+
+<!-- ═══ PICKS ═════════════════════════════════════ -->
+<div id="tab-picks" class="tab-panel">
+  <div class="section" style="margin-bottom:8px;">
+    <div class="eyebrow">Editor's Picks</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:22px;color:var(--crema);margin:6px 0 4px;">주목할 카페 & 원두</h2>
+    <p style="font-size:13px;color:#a89070;">스페셜티 씬에서 지금 화제가 되고 있는 공간과 원두를 소개합니다</p>
+    <div class="update-badge">2026년 6월 업데이트</div>
+  </div>
+
+  <div class="section" style="margin-top:24px;">
+    <div class="section-title">이 달의 스포트라이트 원두</div>
+    <div class="bean-spotlight">
+      <div class="bean-spot-name">Gesha Village — Block 9</div>
+      <div class="bean-spot-sub">에티오피아 카파 지역 · 내추럴 프로세싱 · 2024/25 크롭</div>
+      <div class="bean-spot-grid">
+        <div class="bean-stat"><div class="bean-stat-label">플레이버</div><div class="bean-stat-val">재스민, 베르가못, 복숭아</div></div>
+        <div class="bean-stat"><div class="bean-stat-label">로스트 레벨</div><div class="bean-stat-val">라이트 미디엄</div></div>
+        <div class="bean-stat"><div class="bean-stat-label">추천 온도</div><div class="bean-stat-val">88–91°C</div></div>
+        <div class="bean-stat"><div class="bean-stat-label">비율</div><div class="bean-stat-val">1 : 16</div></div>
+        <div class="bean-stat"><div class="bean-stat-label">SCA 점수</div><div class="bean-stat-val">90.5 pts</div></div>
+        <div class="bean-stat"><div class="bean-stat-label">구매처</div><div class="bean-stat-val">커피리브레, 모모스</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">지금 가볼 만한 브루잉 카페</div>
+    <div class="picks-grid">
+      <div class="pick-card type-cafe">
+        <div class="pick-label">☕ Café Pick</div>
+        <div class="pick-name">테일러커피 성수</div>
+        <div class="pick-loc">📍 서울 성동구 성수동</div>
+        <div class="pick-desc">국내 핸드드립 씬을 이끌어온 테일러커피의 플래그십. 시즌마다 산지 직수입 원두 로테이션. V60 추출 기술을 제대로 경험할 수 있는 공간.</div>
+        <div class="pick-tags"><span class="pick-tag">V60</span><span class="pick-tag">산지직수입</span><span class="pick-tag">교육</span></div>
+      </div>
+      <div class="pick-card type-cafe">
+        <div class="pick-label">☕ Café Pick</div>
+        <div class="pick-name">모모스커피 부산</div>
+        <div class="pick-loc">📍 부산 수영구 광안동</div>
+        <div class="pick-desc">WBC 챔피언 전주연 바리스타의 로스터리 카페. 커피 품질 기준이 국내 최상위. 방문 자체가 커핑 수업이 될 정도의 밀도 있는 경험.</div>
+        <div class="pick-tags"><span class="pick-tag">스페셜티</span><span class="pick-tag">로스터리</span><span class="pick-tag">챔피언십</span></div>
+      </div>
+      <div class="pick-card type-cafe">
+        <div class="pick-label">☕ Café Pick</div>
+        <div class="pick-name">프릳츠커피컴퍼니</div>
+        <div class="pick-loc">📍 서울 마포구 도화동</div>
+        <div class="pick-desc">국내 스페셜티 1세대의 핵심. 브루잉 메뉴 다양성과 직원 교육 수준이 높아 업계 취업을 꿈꾸는 이들에게 특히 추천.</div>
+        <div class="pick-tags"><span class="pick-tag">브루잉바</span><span class="pick-tag">교육카페</span><span class="pick-tag">1세대</span></div>
+      </div>
+      <div class="pick-card type-cafe">
+        <div class="pick-label">☕ Café Pick</div>
+        <div class="pick-name">알마 커피</div>
+        <div class="pick-loc">📍 서울 용산구 한남동</div>
+        <div class="pick-desc">코스타리카·파나마 마이크로랏 중심의 소규모 로스터리. 게샤 품종 핸드드립으로 유명. 원두 설명이 매우 상세해 학습에도 도움.</div>
+        <div class="pick-tags"><span class="pick-tag">마이크로랏</span><span class="pick-tag">게샤</span><span class="pick-tag">소규모로스터리</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">주목받는 원두 & 로스터리</div>
+    <div class="picks-grid">
+      <div class="pick-card type-bean">
+        <div class="pick-label">🫘 Bean</div>
+        <div class="pick-name">Panama Elida Natural Gesha</div>
+        <div class="pick-loc">보케테 지역 · 엘리다 농장</div>
+        <div class="pick-desc">Best of Panama에서 연속 최고가를 기록한 게샤 품종. 내추럴 방식의 농익은 과일향과 와인 톤이 매력. 소량 입고 즉시 품절되는 희귀 원두.</div>
+        <div class="pick-tags"><span class="pick-tag">파나마</span><span class="pick-tag">게샤</span><span class="pick-tag">내추럴</span></div>
+      </div>
+      <div class="pick-card type-bean">
+        <div class="pick-label">🫘 Bean</div>
+        <div class="pick-name">Kenya Kamwangi AA</div>
+        <div class="pick-loc">키리냐가 지역 · 더블워시드</div>
+        <div class="pick-desc">케냐 특유의 블랙커런트·자두 산미가 두드러지는 정통 아프리카 워시드. 핸드드립으로 추출 시 명확한 산미 표현 연습에 최적.</div>
+        <div class="pick-tags"><span class="pick-tag">케냐</span><span class="pick-tag">워시드</span><span class="pick-tag">산미연습</span></div>
+      </div>
+      <div class="pick-card type-roaster">
+        <div class="pick-label">🔥 Roaster</div>
+        <div class="pick-name">커피리브레</div>
+        <div class="pick-loc">📍 서울 서촌 & 온라인</div>
+        <div class="pick-desc">국내 스페셜티 정립의 주역. 산지 직수입 + 교육 + 유통까지. 정기구독 서비스로 시즌 원두를 경험하며 원산지 맛 공부에 최적.</div>
+        <div class="pick-tags"><span class="pick-tag">정기구독</span><span class="pick-tag">산지교육</span><span class="pick-tag">리브레스쿨</span></div>
+      </div>
+      <div class="pick-card type-roaster">
+        <div class="pick-label">🔥 Roaster</div>
+        <div class="pick-name">하이엔드 커피로스터스</div>
+        <div class="pick-loc">📍 서울 성동구 & 온라인</div>
+        <div class="pick-desc">최근 빠르게 주목받는 신흥 로스터리. 독특한 발효 프로세싱 원두 라인업이 강점. 마이크로랏 한정 로트 구성.</div>
+        <div class="pick-tags"><span class="pick-tag">발효프로세싱</span><span class="pick-tag">마이크로랏</span><span class="pick-tag">신흥</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /.app -->
 
 <script>
-// ── STATE ──
-const ALARM_TIME = '08:30';
-let alarmOn = true;
-let alarmFired = false;
-
-const CHECKLIST_ITEMS = [
-  { id: 'wake',    icon: '⏰', title: '기상 확인',          sub: '08:30에 일어났나요?',          time: '08:30' },
-  { id: 'blind',   icon: '🌅', title: '커튼 / 블라인드 열기', sub: '햇빛을 바로 맞이하세요',       time: '08:31' },
-  { id: 'water',   icon: '💧', title: '물 한 잔',            sub: '공복에 미지근한 물 200ml',      time: '08:35' },
-  { id: 'stretch', icon: '🧘', title: '스트레칭 5분',        sub: '목, 어깨, 허리 가볍게',        time: '08:40' },
-  { id: 'walk',    icon: '🚶', title: '야외 산책',            sub: '햇빛 속 10~20분 걷기',         time: '09:00' },
-  { id: 'sun',     icon: '☀️', title: '햇빛 노출 확인',      sub: '눈에 자연광이 닿았나요?',      time: '09:20' },
-  { id: 'reading', icon: '📖', title: '독서',                sub: '하루 10~20분, 한 챕터씩',      time: '09:30' },
+// ════════════════════════════════════════════════
+// REAL NEWS DATA (sourced June 2026)
+// ════════════════════════════════════════════════
+const NEWS = [
+  {
+    cat:'event', catLabel:'대회 & 이벤트',
+    title:'World Brewers Cup 2026 — 브뤼셀 개최 확정',
+    body:'2026 World Brewers Cup이 6월 25–27일 벨기에 브뤼셀 World of Coffee 행사와 함께 개최됩니다. 올해부터 Compulsory·Open Service 두 라운드 모두 공인 그라인더(OPTION-O LAGOM 01)가 의무 지급되는 방식으로 규정이 변경됐습니다. 핸드드립 커리어를 꿈꾼다면 이 대회의 시연 영상을 필수로 챙겨보세요.',
+    source:'SCA / World Coffee Championships'
+  },
+  {
+    cat:'trend', catLabel:'트렌드',
+    title:'스페셜티 커피, 미국 일반 커피 소비량 첫 추월 유지',
+    body:'NCA·SCA가 공동 발표한 2026 Specialty Coffee Report에 따르면 미국 성인의 하루 스페셜티 커피 소비율이 47%로 일반 커피(42%)를 2년 연속 앞섰습니다. 콜드브루와 에스프레소 성장이 주도했으며, 특히 2030세대의 홈브루잉 수요가 두드러졌습니다.',
+    source:'NCA / Daily Coffee News (June 2, 2026)'
+  },
+  {
+    cat:'origin', catLabel:'원산지',
+    title:'탄자니아 커피 생산량 10% 증가 전망',
+    body:'USDA FAS 보고서에 따르면 2026/27 시즌 탄자니아 생두 생산량이 전년 대비 10.3% 증가한 160만 백(60kg 기준)에 달할 것으로 예측됩니다. rehabilitated 농장의 수확 본격화와 코러스 인터내셔널의 3000만 달러 묘목 지원 사업이 배경입니다. 탄자니아 AA·PB 원두의 접근성이 높아질 수 있습니다.',
+    source:'USDA FAS / Daily Coffee News (June 1, 2026)'
+  },
+  {
+    cat:'farm', catLabel:'농장',
+    title:'에티오피아 생두 공급 타이트 — 워시드 가뭄 주의',
+    body:'2025/26 시즌 에티오피아 수확이 늦어지면서 워시드 로트 가용 물량이 작년보다 크게 줄었습니다. 높은 가격을 기대한 농부들이 내추럴 자가 건조를 선택한 결과입니다. 국내 로스터리들의 에티오피아 워시드 재고가 빠르게 소진되고 있으니, 좋아하는 워시드 원두는 서둘러 구입을 권장합니다.',
+    source:'Royal New York Green Coffee (April 2026)'
+  },
+  {
+    cat:'trend', catLabel:'트렌드',
+    title:'발효 프로세싱, 스페셜티 씬 주류로 자리잡다',
+    body:'Coffee Intelligence 조사에 따르면 스페셜티 로스터의 68%가 이미 실험적 발효 프로세싱 원두를 취급하고 있습니다. 콜롬비아산 Co-fermented 로트에 대한 검색량이 2026년 초부터 급격히 증가했으며, 원산지보다 "농장 스타일"과 프로세싱 방식이 소비자 선택의 핵심 기준이 되는 흐름입니다.',
+    source:'Coffee Intelligence (April 22, 2026)'
+  },
+  {
+    cat:'market', catLabel:'시장 동향',
+    title:'World of Coffee 2027 — 리스본 개최 예정',
+    body:'SCA는 2027년 플래그십 유럽 행사를 포르투갈 리스본에서 개최할 예정이라고 발표했습니다. 2026 브뤼셀 이후 유럽 스페셜티 씬의 거점이 서유럽으로 이동하는 흐름입니다. 리스본은 아프리카 산지(앙골라·에티오피아)와의 역사적 커피 교역로로 상징성이 있습니다.',
+    source:'SCA News / Daily Coffee News (June 4, 2026)'
+  }
 ];
 
-const QUOTES = [
-  { text: '아침은 하루 중 가장 조용한 선물이에요.', author: '— LUMA Morning' },
-  { text: '햇빛 한 줌이 하루의 방향을 정해요.', author: '— LUMA Morning' },
-  { text: '루틴은 자유를 만드는 구조예요.', author: '— Mason Currey' },
-  { text: '일어나는 것만으로도 이미 절반은 성공했어요.', author: '— LUMA Morning' },
-  { text: '작은 아침 의식이 삶의 결을 바꿔요.', author: '— LUMA Morning' },
-];
+// ════════════════════════════════════════════════
+// CHECKLIST DATA
+// ════════════════════════════════════════════════
+const ITEMS = {
+  basic:[
+    {id:'b1',title:'뜸들이기(Pre-infusion) 이해하기',desc:'30–45초 뜸 시간 동안 CO₂가 방출되며 원두가 균일하게 젖는 원리. 신선도 높은 원두일수록 부풀음이 크다.',tip:'TIP: 원두량의 2배 물로 30초 뜸 → 균일 추출의 기본'},
+    {id:'b2',title:'원두:물 비율 고정 + 스케일 사용 습관화',desc:'1:15(진함) ~ 1:17(연함) 범위에서 일관된 레시피를 유지하는 것이 재현성의 핵심. 눈대중은 금물.',tip:'TIP: 1:15 = 15g 원두 / 225ml 물'},
+    {id:'b3',title:'물 온도와 추출 관계 실험',desc:'고온(93–96°C)은 강한 바디와 쓴맛, 저온(85–90°C)은 산미와 밝은 향을 끌어낸다. 같은 원두로 5°C씩 조절해 비교.',tip:'TIP: 라이트 로스트 → 93–96°C, 다크 로스트 → 88–91°C'},
+    {id:'b4',title:'V60 or 칼리타 하나 집중 마스터',desc:'V60: 원뿔형 단일 구멍 — 추출자 기술 의존도 높음 / 칼리타: 평평한 3구멍 — 더 안정적. 하나로 깊게 파고들기.',tip:'TIP: 처음이라면 칼리타 웨이브로 시작 추천'},
+    {id:'b5',title:'그라인드 입자와 추출 속도 관계 파악',desc:'굵게 갈수록 빠른 추출·약한 농도, 곱게 갈수록 느린 추출·과추출 위험. 목표 추출 시간 2:30±20초 기준으로 세팅.',tip:'TIP: 추출이 너무 빠르면 더 곱게, 너무 느리면 더 굵게'},
+    {id:'b6',title:'부어주기 패턴(Pouring Pattern) 익히기',desc:'센터 푸어, 스파이럴 푸어, 펄스 푸어의 차이. 각 방식이 추출 균일성과 농도에 미치는 영향을 실험.',tip:'TIP: 스파이럴 3회 → 센터 1회 패턴이 가장 안정적'},
+  ],
+  advanced:[
+    {id:'a1',title:'추출 수율(Extraction Yield) 계산하기',desc:'추출 수율 = (총 용존 고형물 / 원두 무게) × 100. 18–22%가 황금 구간(SCA 기준). TDS 계측기로 직접 측정해보자.',tip:'TIP: TDS 1.2–1.45% + 수율 18–22% = 이상적 추출'},
+    {id:'a2',title:'프로세싱 방식 맛 차이 체계적으로 비교',desc:'워시드: 깨끗하고 산미 선명 / 내추럴: 과일향·발효 진함 / 허니: 그 중간. 같은 원산지에서 세 방식 비교 추출 필수.',tip:'TIP: 에티오피아 예가체프 워시드 vs 내추럴 비교 추천'},
+    {id:'a3',title:'물 미네랄 성분과 추출 이해',desc:'마그네슘은 단맛·복잡성을 높이고, 과도한 칼슘은 텁텁함을 만든다. 총경도 75–150ppm이 이상적 브루잉 워터.',tip:'TIP: 에비앙(경도 291ppm)은 추출에 부적합'},
+    {id:'a4',title:'변수 제어 비교 실험 기록',desc:'온도, 비율, 그라인드, 물 붓는 속도 중 하나만 바꾸며 테이스팅. 이 기록을 3개월 쌓으면 자신만의 레시피 DB가 생긴다.',tip:'TIP: 브루잉 로그 탭을 활용해 모든 변수 기록'},
+    {id:'a5',title:'에스프레소 기초 이해 (핸드드립과 비교)',desc:'9바 압력, 25–30초 추출, 1:2 비율. 같은 원두를 양쪽으로 추출해 풍미 차이 비교.',tip:'TIP: 에스프레소는 핸드드립보다 훨씬 곱게 갈아야 함'},
+    {id:'a6',title:'Cold Brew & Iced Pour-Over 레시피 개발',desc:'콜드브루: 12–24시간 냉수 침지, 원두:물 1:8. 아이스 핸드드립: 얼음 희석을 고려해 농도 높게 추출.',tip:'TIP: 아이스 V60 = 뜨거운 물 60% + 얼음 40%로 계산'},
+  ],
+  sensory:[
+    {id:'s1',title:'SCA 플레이버 휠 외우기',desc:'커피 풍미를 Fruity / Floral / Sweet / Nutty / Spicy / Roasted 등 9개 대분류, 80여 개 소분류로 나눈 표준 체계.',tip:'TIP: 인쇄해서 커핑할 때마다 옆에 두는 것이 효과적'},
+    {id:'s2',title:'커핑(Cupping) 프로토콜 10회 이상 실습',desc:'분쇄 → 향(Dry) → 물 붓기 → 크러스트 브레이크(Wet) → 식힌 뒤 슬러핑. SCA 공식 커핑 폼 작성 연습.',tip:'TIP: 최소 3인 이상, 블라인드로 진행할 때 효과 극대화'},
+    {id:'s3',title:'원산지별 특성 맛으로 구별하기',desc:'에티오피아: 플로럴·베리 / 케냐: 블랙커런트·토마토 산미 / 콜롬비아: 카라멜·사과 / 브라질: 초콜릿·넛트.',tip:'TIP: 6개월 간 산지별 원두를 돌아가며 마시면 체득 가능'},
+    {id:'s4',title:'과추출 vs 미추출 맛 정확히 구별하기',desc:'미추출: 시큼하고 날카로운 신맛, 가벼운 바디 / 과추출: 쓰고 건조하며 텁텁한 뒷맛. 의도적으로 만들어 비교.',tip:'TIP: 추출 시간 1분 단축 vs 연장으로 직접 실험'},
+  ],
+  cert:[
+    {id:'c1',title:'SCA Barista Skills Foundation',desc:'에스프레소 추출 원리, 우유 스티밍, 장비 관리. 핸드드립 바리스타도 에스프레소 기초 이해를 위해 필수.',tip:'국내 SCA 인증기관: 커피리브레 스쿨, 스페셜티커피아카데미 등'},
+    {id:'c2',title:'SCA Brewing Foundation 취득',desc:'핸드드립·드립 브루어 추출 이론의 표준을 다루는 과정. 추출 변수(비율·온도·분쇄도·시간)를 체계적으로 배움.',tip:'난이도: ★★☆ / 수강료: 약 30–50만원'},
+    {id:'c3',title:'SCA Sensory Skills Foundation 취득',desc:'커피 감각 훈련의 공식 교육. 단맛·산미·쓴맛·향 강도를 정량화하고 기록하는 법을 배움.',tip:'난이도: ★★★ / 미각 훈련이 가장 오래 걸리는 과정'},
+    {id:'c4',title:'CQI Q-Grader 과정 탐색',desc:'커피 품질 평가의 국제 최고 자격증. 22개 시험 항목. 업계 취업·컨설팅·소싱 분야에서 강력한 차별점.',tip:'Q-Grader 취득 후 3년마다 재인증 필요'},
+    {id:'c5',title:'국내 바리스타 2급 이상 자격증 취득',desc:'대한바리스타협회(KBA) 혹은 한국커피협회(KCA) 공인 자격. 국내 카페 취업 시 기본 스펙.',tip:'실기 시험 위주 — 추출 속도와 우유 스티밍이 핵심'},
+  ],
+  career:[
+    {id:'e1',title:'스페셜티 카페 or 로스터리 파트타임 / 인턴',desc:'현장에서만 배울 수 있는 원두 관리, 고객 응대, 피크타임 추출, 로스팅 스케줄. 최소 3개월 이상 권장.',tip:'TIP: 지원 전 해당 카페의 원두·추출 방식을 미리 공부하고 가면 플러스'},
+    {id:'e2',title:'홈 로스팅 or 로스터리 로스팅 견학',desc:'로스팅 단계(1차·2차 크랙)와 로스트 레벨이 추출 맛에 어떤 영향을 주는지 체감. 홈 로스팅은 팬 로스터로 시작 가능.',tip:'TIP: 코르넷 or Gene Cafe 로스터로 소량 홈 로스팅 추천'},
+    {id:'e3',title:'SNS·블로그 추출 기록 10회 이상 공개 게시',desc:'기록의 공개가 학습 밀도를 높인다. 레시피·테이스팅 노트·실패 기록까지 솔직하게 공유하면 커뮤니티 피드백도 얻을 수 있음.',tip:'TIP: 인스타 or 네이버 블로그 꾸준히 운영 → 포트폴리오 자산화'},
+    {id:'e4',title:'커피 대회 참가 또는 관람 (KBrC 등)',desc:'출전하면 레시피를 최상으로 다듬는 집중 훈련이 된다. 관람만 해도 업계 수준과 트렌드를 파악하는 데 큰 도움.',tip:'KBrC 예선은 지역별 개최 — 용기 내서 첫 출전 도전!'},
+    {id:'e5',title:'공개 커핑 세션 3회 이상 참석',desc:'로스터리가 여는 공개 커핑은 무료이거나 소액. 전문가의 언어로 커피를 묘사하는 방법을 귀로 배울 수 있는 최고의 현장.',tip:'TIP: 커피리브레·모모스·프릳츠 커핑 일정을 SNS에서 팔로우'},
+    {id:'e6',title:'원두 산지 방문 투어 (에티오피아·콜롬비아 등)',desc:'농장에서 직접 체리를 따고 가공 과정을 보는 경험은 커피 이해도를 한 단계 비약시킴. 커피 투어 전문 에이전시 활용.',tip:'TIP: 오리진 트립 전 스페인어(콜롬비아) 인사말 준비'},
+    {id:'e7',title:'지인 대상 핸드드립 클래스 직접 진행',desc:'가르치는 것이 가장 빠른 학습. 비율·온도·도구 설명을 5분 안에 명확히 할 수 있을 때 진짜 이해한 것.',tip:'TIP: 클래스 내용을 영상으로 남겨두면 포트폴리오 활용 가능'},
+  ]
+};
 
-// ── STORAGE ──
-const TODAY = new Date().toDateString();
-let checked = JSON.parse(localStorage.getItem('luma_checked_' + TODAY) || '{}');
-let streak = parseInt(localStorage.getItem('luma_streak') || '0');
-let lastDone = localStorage.getItem('luma_last_done');
+const BADGE = { skill:['skill','스킬'], cert:['cert','자격증'], exp:['exp','경험'] };
 
-// ── CLOCK ──
-function updateClock() {
-  const now = new Date();
-  const hh = String(now.getHours()).padStart(2,'0');
-  const mm = String(now.getMinutes()).padStart(2,'0');
-  const ss = String(now.getSeconds()).padStart(2,'0');
-  document.getElementById('clockHM').textContent = hh + ':' + mm;
-  document.getElementById('clockS').textContent = ':' + ss;
+// ════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════
+let done = (() => { try { return JSON.parse(localStorage.getItem('cf_done')||'{}'); } catch { return {}; } })();
+let logs = (() => { try { return JSON.parse(localStorage.getItem('cf_logs')||'[]'); } catch { return []; } })();
+function saveD() { try { localStorage.setItem('cf_done', JSON.stringify(done)); } catch {} }
+function saveL() { try { localStorage.setItem('cf_logs', JSON.stringify(logs)); } catch {} }
 
-  // Update date
-  const days = ['일','월','화','수','목','금','토'];
-  const months = ['1','2','3','4','5','6','7','8','9','10','11','12'];
-  document.getElementById('dateDay').textContent = now.getDate();
-  document.getElementById('dateInfo').textContent = days[now.getDay()] + '요일 · ' + months[now.getMonth()] + '월';
-
-  // Countdown
-  const [ah, am] = ALARM_TIME.split(':').map(Number);
-  const alarmDate = new Date(now);
-  alarmDate.setHours(ah, am, 0, 0);
-  if (alarmDate <= now) alarmDate.setDate(alarmDate.getDate() + 1);
-  const diff = alarmDate - now;
-  const dh = Math.floor(diff / 3600000);
-  const dm = Math.floor((diff % 3600000) / 60000);
-  const ds = Math.floor((diff % 60000) / 1000);
-  if (dh > 0) {
-    document.getElementById('countdown').textContent = dh + '시간 ' + dm + '분';
-  } else if (dm > 0) {
-    document.getElementById('countdown').textContent = dm + '분 ' + ds + '초';
-  } else {
-    document.getElementById('countdown').textContent = ds + '초';
-  }
-
-  // Check alarm
-  if (alarmOn && !alarmFired && hh + ':' + mm === ALARM_TIME && ss === '00') {
-    triggerAlarm();
-  }
+// ════════════════════════════════════════════════
+// CHECKLIST
+// ════════════════════════════════════════════════
+function chk() {
+  return `<div class="checkbox"><svg width="12" height="9" viewBox="0 0 12 9" fill="none"><path d="M1 4L4.5 7.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`;
 }
-
-// ── ALARM ──
-function toggleAlarm() {
-  alarmOn = !alarmOn;
-  document.getElementById('alarmToggle').classList.toggle('on', alarmOn);
-}
-
-function triggerAlarm() {
-  alarmFired = true;
-  document.getElementById('alarmRingTime').textContent = ALARM_TIME;
-  document.getElementById('alarmOverlay').classList.add('show');
-  // Try vibration
-  if (navigator.vibrate) navigator.vibrate([500,200,500,200,500]);
-}
-
-function dismissAlarm() {
-  document.getElementById('alarmOverlay').classList.remove('show');
-  // Auto-check wake
-  if (!checked['wake']) {
-    checked['wake'] = true;
-    saveAndRender();
-  }
-}
-
-// ── WEATHER (GPS 기반) ──
-let gpsLocationName = '내 위치';
-
-async function loadWeather() {
-  showWeatherLoading();
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const lat = pos.coords.latitude;
-        const lon = pos.coords.longitude;
-        await fetchWeatherData(lat, lon);
-        await reverseGeocode(lat, lon);
-      },
-      async () => {
-        // GPS 거부 시 용인 기본값
-        await fetchWeatherData(37.2411, 127.1776);
-        gpsLocationName = '용인시, 경기도';
-        renderWeather(lastWeatherData);
-      },
-      { timeout: 8000 }
-    );
-  } else {
-    await fetchWeatherData(37.2411, 127.1776);
-    gpsLocationName = '용인시, 경기도';
-    renderWeather(lastWeatherData);
-  }
-}
-
-let lastWeatherData = null;
-
-function showWeatherLoading() {
-  document.getElementById('weatherLeft').innerHTML = `
-    <div class="weather-location" id="gpsLocName">📍 위치 감지 중…</div>
-    <div class="weather-loading">날씨 불러오는 중…</div>
-  `;
-  document.getElementById('weatherRight').innerHTML = '';
-}
-
-async function fetchWeatherData(lat, lon) {
-  try {
-    const res = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode,windspeed_10m,relativehumidity_2m,apparent_temperature&timezone=Asia%2FSeoul`
-    );
-    lastWeatherData = await res.json();
-    renderWeather(lastWeatherData);
-  } catch (e) {
-    document.getElementById('weatherLeft').innerHTML = `
-      <div class="weather-location">📍 ${gpsLocationName}</div>
-      <div class="weather-temp">—<sup>°C</sup></div>
-      <div class="weather-desc">날씨 정보를 불러올 수 없어요</div>
-    `;
-  }
-}
-
-async function reverseGeocode(lat, lon) {
-  try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ko`
-    );
-    const data = await res.json();
-    const addr = data.address;
-    // 시/군/구 + 시/도 조합
-    const city = addr.city || addr.town || addr.county || addr.municipality || '';
-    const state = addr.province || addr.state || '';
-    gpsLocationName = [city, state].filter(Boolean).join(', ') || '내 위치';
-    renderWeather(lastWeatherData);
-  } catch (e) {
-    // geocode 실패해도 날씨는 유지
-    renderWeather(lastWeatherData);
-  }
-}
-
-function renderWeather(data) {
-  if (!data) return;
-  const c = data.current;
-  const temp = Math.round(c.temperature_2m);
-  const feels = Math.round(c.apparent_temperature);
-  const code = c.weathercode;
-  const wind = Math.round(c.windspeed_10m);
-  const hum = c.relativehumidity_2m;
-
-  const weatherInfo = getWeatherInfo(code);
-  const goodForWalk = code < 50 && temp > 5 && temp < 35;
-
-  document.getElementById('weatherLeft').innerHTML = `
-    <div class="weather-location">📍 ${gpsLocationName}</div>
-    <div class="weather-temp">${temp}<sup>°C</sup></div>
-    <div class="weather-desc">${weatherInfo.desc} · 체감 ${feels}°</div>
-    <div class="outdoor-badge ${goodForWalk ? 'good' : 'caution'}">
-      ${goodForWalk ? '✓ 산책하기 좋아요' : '⚠ 야외 주의'}
-    </div>
-  `;
-
-  document.getElementById('weatherRight').innerHTML = `
-    <span class="weather-icon">${weatherInfo.icon}</span>
-    <div class="weather-detail">
-      바람 ${wind} km/h<br>
-      습도 ${hum}%
-    </div>
-  `;
-}
-
-function getWeatherInfo(code) {
-  if (code === 0) return { icon: '☀️', desc: '맑음' };
-  if (code <= 2) return { icon: '🌤', desc: '구름 조금' };
-  if (code <= 3) return { icon: '☁️', desc: '흐림' };
-  if (code <= 49) return { icon: '🌫', desc: '안개' };
-  if (code <= 59) return { icon: '🌦', desc: '이슬비' };
-  if (code <= 69) return { icon: '🌧', desc: '비' };
-  if (code <= 79) return { icon: '❄️', desc: '눈' };
-  if (code <= 84) return { icon: '🌧', desc: '소나기' };
-  if (code <= 99) return { icon: '⛈', desc: '뇌우' };
-  return { icon: '🌡', desc: '날씨 확인 중' };
-}
-
-// ── CHECKLIST ──
-function renderChecklist() {
-  const container = document.getElementById('checklist');
-  container.innerHTML = CHECKLIST_ITEMS.map(item => `
-    <div class="check-item ${checked[item.id] ? 'done' : ''}" onclick="toggleCheck('${item.id}')">
-      <div class="check-box">
-        <span class="check-box-inner">✓</span>
+function renderSec(id, items, badge) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const [cls, lbl] = BADGE[badge] || ['skill','스킬'];
+  el.innerHTML = items.map(item => {
+    const isDone = !!done[item.id];
+    return `<div class="check-item ${isDone?'done':''}" onclick="toggle('${item.id}')">
+      ${chk()}
+      <div class="item-content">
+        <div class="item-title">${item.title}</div>
+        <div class="item-desc">${item.desc}</div>
+        <div class="item-meta">
+          <span class="item-badge badge-${cls}">${lbl}</span>
+          ${item.tip ? `<span class="item-tip">${item.tip}</span>` : ''}
+        </div>
       </div>
-      <span class="check-icon">${item.icon}</span>
-      <div class="check-content">
-        <div class="check-title">${item.title}</div>
-        <div class="check-sub">${item.sub}</div>
-      </div>
-      <div class="check-time">${item.time}</div>
-    </div>
-  `).join('');
-
-  const done = Object.values(checked).filter(Boolean).length;
-  const total = CHECKLIST_ITEMS.length;
-  const pct = Math.round((done / total) * 100);
-
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('progressPct').textContent = pct + '%';
-
-  // Complete banner
-  const banner = document.getElementById('completeBanner');
-  if (pct === 100) {
-    banner.classList.add('show');
-    // Update streak
-    if (lastDone !== TODAY) {
-      streak++;
-      localStorage.setItem('luma_streak', streak);
-      localStorage.setItem('luma_last_done', TODAY);
-      lastDone = TODAY;
-      renderStreak();
-    }
-  } else {
-    banner.classList.remove('show');
-  }
-}
-
-function toggleCheck(id) {
-  checked[id] = !checked[id];
-  saveAndRender();
-}
-
-function saveAndRender() {
-  localStorage.setItem('luma_checked_' + TODAY, JSON.stringify(checked));
-  renderChecklist();
-}
-
-function resetChecklist() {
-  if (confirm('오늘 루틴을 초기화할까요?')) {
-    checked = {};
-    localStorage.removeItem('luma_checked_' + TODAY);
-    renderChecklist();
-  }
-}
-
-// ── STREAK DOTS ──
-function renderStreak() {
-  document.getElementById('streakNum').textContent = streak;
-  const days = ['일','월','화','수','목','금','토'];
-  const now = new Date();
-  const dotsHtml = Array.from({length: 7}, (_, i) => {
-    const d = new Date(now);
-    d.setDate(d.getDate() - (6 - i));
-    const isToday = d.toDateString() === TODAY;
-    const dayLabel = days[d.getDay()];
-    // Simulate past completions based on streak
-    const pastDone = i < 6 && i >= (6 - streak);
-    const todayDone = isToday && Object.values(checked).filter(Boolean).length === CHECKLIST_ITEMS.length;
-    const isDone = pastDone || todayDone;
-    return `
-      <div class="streak-dot ${isDone ? 'done' : ''}">
-        ${isDone ? '<div class="dot-inner"></div>' : ''}
-        <span class="dot-day">${dayLabel}</span>
-      </div>
-    `;
+    </div>`;
   }).join('');
-  document.getElementById('streakDots').innerHTML = dotsHtml;
+}
+function renderAll() {
+  renderSec('cl-basic',    ITEMS.basic,    'skill');
+  renderSec('cl-advanced', ITEMS.advanced, 'skill');
+  renderSec('cl-sensory',  ITEMS.sensory,  'skill');
+  renderSec('cl-cert',     ITEMS.cert,     'cert');
+  renderSec('cl-career',   ITEMS.career,   'exp');
+  updateProg();
+}
+function updateProg() {
+  const all = Object.values(ITEMS).flat();
+  const total = all.length, comp = all.filter(i => done[i.id]).length;
+  const pct = Math.round(comp/total*100);
+  document.getElementById('progress-fill').style.width = pct+'%';
+  document.getElementById('progress-pct').textContent = pct+'%';
+  document.getElementById('progress-text').textContent = `${comp} / ${total} 완료`;
+}
+function toggle(id) { done[id] = !done[id]; saveD(); renderAll(); }
+
+// ════════════════════════════════════════════════
+// BREW LOG
+// ════════════════════════════════════════════════
+function addLog() {
+  const origin = document.getElementById('log-origin').value.trim();
+  if (!origin) { alert('원두 이름을 입력해주세요'); return; }
+  const entry = {
+    id: Date.now(), origin,
+    method: document.getElementById('log-method').value,
+    dose:   document.getElementById('log-dose').value,
+    water:  document.getElementById('log-water').value,
+    temp:   document.getElementById('log-temp').value,
+    time:   document.getElementById('log-time').value,
+    grind:  document.getElementById('log-grind').value,
+    rating: document.getElementById('log-rating').value,
+    note:   document.getElementById('log-note').value,
+    date:   new Date().toLocaleDateString('ko-KR',{month:'short',day:'numeric'})
+  };
+  logs.unshift(entry);
+  saveL();
+  renderLogs();
+  ['log-origin','log-dose','log-water','log-temp','log-time','log-grind','log-note']
+    .forEach(i => document.getElementById(i).value = '');
+  document.getElementById('log-rating').value = '4';
 }
 
-// ── QUOTE ──
-function renderQuote() {
-  const q = QUOTES[new Date().getDay() % QUOTES.length];
-  document.getElementById('quoteText').textContent = q.text;
-  document.getElementById('quoteAuthor').textContent = q.author;
+function deleteLog(id) {
+  if (!confirm('이 기록을 삭제할까요?')) return;
+  logs = logs.filter(l => l.id !== id);
+  saveL();
+  renderLogs();
 }
 
-// ── INIT ──
-document.getElementById('alarmToggle').classList.add('on');
-setInterval(updateClock, 1000);
-updateClock();
-loadWeather();
-renderChecklist();
-renderStreak();
-renderQuote();
-
-
-// ── JAZZ PLAYER (SoundCloud Widget) ──
-// 검증된 공개 SoundCloud 채널/플레이리스트
-const BASE = 'https://w.soundcloud.com/player/?color=%23C8994A&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false';
-
-const SC_PLAYLISTS = [
-  {
-    name: '🎷 Jazz Lofi — Lofi Girl',
-    url: `${BASE}&url=https%3A//soundcloud.com/lofi_girl/sets/jazz-lofi`
-  },
-  {
-    name: '🎸 Lofi Jazz Hop',
-    url: `${BASE}&url=https%3A//soundcloud.com/chill-playlister/sets/lofi-jazz-hop-lo-fi-beats`
-  },
-  {
-    name: '☕ Chillhop Jazz Radio',
-    url: `${BASE}&url=https%3A//soundcloud.com/komplextrus/sets/chillhop-radio-jazz-lofi-hip`
-  },
-  {
-    name: '🎵 No Copyright Lofi Jazz',
-    url: `${BASE}&url=https%3A//soundcloud.com/minjee-kang-51559651/sets/no-copyright-lofi-jazz`
-  },
-  {
-    name: '💿 Jazz Hop Café Mix',
-    url: `${BASE}&url=https%3A//soundcloud.com/jazzhopcafe/record-shop-jazz-hop-lofi-chill-mix`
-  },
-  {
-    name: '🌅 LoFi Covers Morning',
-    url: `${BASE}&url=https%3A//soundcloud.com/riki-lion-44709235/sets/lofi-cover-of-popular-song`
-  },
-];
-
-// 페이지 열 때마다 랜덤 셔플 (Math.random 기반 — 매번 다름)
-function shuffleArray(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+function renderLogs() {
+  const el = document.getElementById('log-entries');
+  if (!logs.length) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">☕</div><p>첫 브루잉 기록을 남겨보세요</p></div>';
+    return;
   }
-  return a;
+  el.innerHTML = logs.map(l => {
+    const stars = '★'.repeat(+l.rating) + '☆'.repeat(5-+l.rating);
+    const params = [
+      l.dose  ? `원두 <span>${l.dose}g</span>` : '',
+      l.water ? `물 <span>${l.water}ml</span>` : '',
+      l.temp  ? `온도 <span>${l.temp}°C</span>` : '',
+      l.time  ? `시간 <span>${l.time}</span>` : '',
+      l.grind ? `그라인드 <span>${l.grind}</span>` : '',
+    ].filter(Boolean);
+    return `<div class="log-entry rated-${l.rating}">
+      <button class="delete-btn" onclick="deleteLog(${l.id})">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M1 1L11 11M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        삭제
+      </button>
+      <div class="log-meta">
+        <span class="log-origin">${l.origin}</span>
+        <span class="log-method">${l.method}</span>
+        <span class="log-date">${l.date}</span>
+      </div>
+      <div class="log-stars">${stars}</div>
+      ${l.note ? `<div class="log-note">${l.note}</div>` : ''}
+      ${params.length ? `<div class="log-params">${params.map(p=>`<span class="log-param">${p}</span>`).join('')}</div>` : ''}
+    </div>`;
+  }).join('');
 }
 
-const SHUFFLED_PLAYLISTS = shuffleArray(SC_PLAYLISTS);
-let currentPLIdx = 0;
-
-function initJazz() {
-  loadPlaylist(0);
-  renderPlaylistChips();
-  setTimeout(() => document.getElementById('jazzVinyl').classList.add('spinning'), 800);
-}
-
-function loadPlaylist(idx) {
-  currentPLIdx = idx;
-  const pl = SHUFFLED_PLAYLISTS[idx];
-  document.getElementById('jazzTrackName').textContent = pl.name;
-  // auto_play=true 로 바로 재생 시도
-  document.getElementById('scFrame').src = pl.url + '&auto_play=true';
-  renderPlaylistChips();
-}
-
-function renderPlaylistChips() {
-  const row = document.getElementById('playlistRow');
-  row.innerHTML = SHUFFLED_PLAYLISTS.map((pl, i) => `
-    <button class="pl-chip ${i === currentPLIdx ? 'active' : ''}" onclick="loadPlaylist(${i})">
-      ${pl.name}
-    </button>
+// ════════════════════════════════════════════════
+// NEWSLETTER — render static news immediately,
+// then optionally fetch AI insights per card
+// ════════════════════════════════════════════════
+function renderNewsStatic() {
+  const el = document.getElementById('nl-content');
+  el.innerHTML = NEWS.map((n,i) => `
+    <div class="nl-card" id="nlcard-${i}">
+      <span class="nl-cat ${n.cat}">${n.catLabel}</span>
+      <h3>${n.title}</h3>
+      <p class="nl-body">${n.body}</p>
+      <div class="nl-footer">
+        <span class="nl-source-tag">출처: ${n.source}</span>
+      </div>
+      <div class="ai-insight" id="ai-${i}" style="display:none;"></div>
+    </div>
   `).join('');
 }
 
-function nextPlaylist() {
-  loadPlaylist((currentPLIdx + 1) % SHUFFLED_PLAYLISTS.length);
+let insightsLoaded = false;
+
+async function loadInsights() {
+  const btn = document.getElementById('nl-btn');
+  btn.disabled = true;
+  btn.textContent = '불러오는 중...';
+
+  // Show loading placeholders for cards not yet successfully loaded
+  NEWS.forEach((_,i) => {
+    const box = document.getElementById(`ai-${i}`);
+    if (box && box.dataset.done !== 'true') {
+      box.className = 'ai-insight';
+      box.style.display = 'block';
+      box.innerHTML = '<span class="ai-loading">바리스타 관점에서 분석 중</span>';
+    }
+  });
+
+  // Fire all requests in parallel, one per card
+  const results = await Promise.allSettled(NEWS.map((n, i) => fetchInsight(n, i)));
+  const failCount = results.filter(r => r.status === 'rejected').length;
+
+  if (failCount === 0) {
+    btn.textContent = '✓ 코멘트 완료';
+    insightsLoaded = true;
+    btn.disabled = true;
+  } else if (failCount === NEWS.length) {
+    btn.textContent = '⚠ 다시 시도';
+    btn.disabled = false;
+  } else {
+    btn.textContent = '↻ 나머지 다시 시도';
+    btn.disabled = false;
+  }
 }
 
+async function fetchInsight(newsItem, idx) {
+  const prompt = `당신은 경력 5년의 한국인 스페셜티 바리스타입니다.
+다음 커피 업계 뉴스를 읽고, 핸드드립 바리스타 입장에서 실용적이고 구체적인 코멘트를 한국어 2문장으로 작성하세요.
+마크다운, 기호, 번호 없이 순수 텍스트로만 답하세요.
 
-initJazz();
+뉴스: ${newsItem.title} — ${newsItem.body}`;
 
-// Refresh weather every 15 minutes
-setInterval(loadWeather, 900000);
+  const box = document.getElementById(`ai-${idx}`);
+
+  // Skip cards that already loaded successfully
+  if (box && box.dataset.done === 'true') return;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20000);
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 200,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    clearTimeout(timeout);
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const text = (data.content || []).map(b => b.text || '').join('').trim();
+    if (!text) throw new Error('empty response');
+
+    if (box) {
+      box.className = 'ai-insight';
+      box.innerHTML = text;
+      box.dataset.done = 'true';
+    }
+  } catch (e) {
+    clearTimeout(timeout);
+    if (box) {
+      box.className = 'ai-insight is-error';
+      box.innerHTML = '코멘트를 불러오지 못했습니다. 버튼을 눌러 다시 시도해주세요.';
+    }
+    throw e;
+  }
+}
+
+// ════════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════════
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════
+renderAll();
+renderLogs();
+renderNewsStatic();   // news shows immediately without API
 </script>
 </body>
 </html>
