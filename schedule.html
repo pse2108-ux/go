@@ -1,1 +1,493 @@
-https://github.com/pse2108-ux/go/edit/main/schedule.html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F5F4F0">
+<title>Schedule Viewer</title>
+<script>
+(function(){
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180"><rect width="180" height="180" rx="38" fill="#F5F4F0"/><rect x="22" y="44" width="136" height="114" rx="14" fill="#fff" stroke="#E8E6E1" stroke-width="3"/><rect x="22" y="44" width="136" height="38" rx="14" fill="#4A7C59"/><rect x="22" y="64" width="136" height="18" fill="#4A7C59"/><rect x="56" y="28" width="12" height="32" rx="6" fill="#2C5F3F"/><rect x="112" y="28" width="12" height="32" rx="6" fill="#2C5F3F"/><rect x="36" y="100" width="14" height="10" rx="3" fill="#E8E6E1"/><rect x="58" y="100" width="14" height="10" rx="3" fill="#E8E6E1"/><rect x="80" y="100" width="14" height="10" rx="3" fill="#4A7C59"/><rect x="102" y="100" width="14" height="10" rx="3" fill="#E8E6E1"/><rect x="124" y="100" width="14" height="10" rx="3" fill="#E8E6E1"/><rect x="36" y="120" width="14" height="10" rx="3" fill="#E8E6E1"/><rect x="58" y="120" width="14" height="10" rx="3" fill="#4A6FA5"/><rect x="80" y="120" width="14" height="10" rx="3" fill="#E8E6E1"/><rect x="102" y="120" width="14" height="10" rx="3" fill="#4A6FA5"/><rect x="36" y="140" width="14" height="10" rx="3" fill="#E8E6E1"/><rect x="58" y="140" width="14" height="10" rx="3" fill="#E8E6E1"/><rect x="80" y="140" width="14" height="10" rx="3" fill="#C4622D"/></svg>`;
+  const canvas=document.createElement('canvas'); canvas.width=canvas.height=180;
+  const img=new Image(), blob=new Blob([svg],{type:'image/svg+xml'}), url=URL.createObjectURL(blob);
+  img.onload=function(){ canvas.getContext('2d').drawImage(img,0,0,180,180); URL.revokeObjectURL(url);
+    const png=canvas.toDataURL('image/png');
+    ['apple-touch-icon','icon'].forEach((r,i)=>{ const l=document.createElement('link'); l.rel=r; if(i)l.type='image/png'; l.href=png; document.head.appendChild(l); });
+  }; img.src=url;
+})();
+</script>
+<style>
+:root{
+  --bg:#F5F4F0;--card:#fff;--border:#E8E6E1;--divider:#EFEDE8;--text:#2C2B28;--sub:#8A877E;
+  --today-bg:#FFFDF5;--today-bd:#D4A843;--today-num:#B8892A;
+  --sj-a-bg:#EBF2ED;--sj-a:#4A7C59;--sj-c-bg:#E8EEF7;--sj-c:#4A6FA5;
+  --bs-open-bg:#EBF2ED;--bs-open:#4A7C59;--bs-mid-bg:#F5EED8;--bs-mid:#9A7B2F;
+  --bs-close-bg:#E8EEF7;--bs-close:#4A6FA5;--bs:#B06070;
+  --off-bg:#F5EBEB;--off:#B05252;
+  --sj-m-bg:#F0EEF8;--sj-m:#7B6FAF;--bs-m-bg:#F5ECEE;--bs-m:#B06070;
+  --shared:#C4622D;--hol:#C0412E;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+/* Header */
+.hdr{background:var(--card);border-bottom:1px solid var(--border);padding:10px 12px 8px;position:sticky;top:0;z-index:20;}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
+.title{font-size:14px;font-weight:800;color:var(--text);}
+.mnav{display:flex;align-items:center;gap:5px;}
+.nbtn{width:26px;height:26px;border-radius:7px;background:var(--bg);border:1px solid var(--border);font-size:14px;cursor:pointer;color:var(--sub);display:flex;align-items:center;justify-content:center;}
+.nbtn:hover{background:var(--divider);}
+.mlbl{font-size:13px;font-weight:700;min-width:72px;text-align:center;}
+.lgd{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+.lgd-i{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:var(--sub);}
+.lgd-d{width:6px;height:6px;border-radius:50%;}
+.slgd{display:flex;gap:4px;flex-wrap:wrap;padding-top:7px;border-top:1px solid var(--divider);}
+.spill{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;}
+.spill-off{background:var(--off-bg);color:var(--off);}
+/* Calendar */
+.cal{padding:8px 6px 12px;}
+.whdr{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:3px;}
+.wd{text-align:center;font-size:10px;font-weight:700;color:var(--sub);padding:2px 0;}
+.wd.sat{color:#5A7AC4;}.wd.sun{color:var(--off);}
+.weeks{display:flex;flex-direction:column;gap:2px;}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.dc{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:clamp(3px,1.2vw,7px) clamp(2px,1vw,6px) clamp(2px,.8vw,5px);min-height:clamp(80px,20vw,130px);cursor:pointer;overflow:hidden;}
+.dc:hover{box-shadow:0 2px 8px rgba(44,43,40,.08);}
+.dc.empty{background:transparent;border-color:transparent;cursor:default;pointer-events:none;}
+.dc.today{background:var(--today-bg);border:1.5px solid var(--today-bd);box-shadow:0 0 0 2px rgba(212,168,67,.12);}
+.dc.today .dnt{color:var(--today-num);}
+.dc.past{opacity:.38;}
+.dn{display:flex;align-items:center;gap:2px;flex-wrap:wrap;margin-bottom:3px;}
+.dnt{font-size:clamp(10px,2.8vw,13px);font-weight:800;color:var(--text);line-height:1;}
+.dn.sat .dnt{color:#5A7AC4;}.dn.sun .dnt{color:var(--off);}.dn.hol .dnt{color:var(--hol);}
+.tdot{width:4px;height:4px;border-radius:50%;background:var(--today-bd);flex-shrink:0;}
+.hname{font-size:clamp(6px,1.6vw,8px);font-weight:700;color:var(--hol);line-height:1.2;width:100%;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* Blocks */
+.sb{border-radius:4px;padding:clamp(2px,.6vw,3px) clamp(2px,1vw,5px);margin-bottom:2px;font-size:clamp(8px,2.2vw,10px);line-height:1.3;overflow:hidden;}
+.sj-a{background:var(--sj-a-bg);border-left:2px solid var(--sj-a);color:var(--sj-a);}
+.sj-c{background:var(--sj-c-bg);border-left:2px solid var(--sj-c);color:var(--sj-c);}
+.bs-op{background:var(--bs-open-bg);border-left:2px solid var(--bs-open);color:var(--bs-open);}
+.bs-md{background:var(--bs-mid-bg);border-left:2px solid var(--bs-mid);color:var(--bs-mid);}
+.bs-cl{background:var(--bs-close-bg);border-left:2px solid var(--bs-close);color:var(--bs-close);}
+.off-sj,.off-bs{background:var(--off-bg);border-left:2px solid var(--off);color:var(--off);}
+.sn{font-weight:700;font-size:clamp(7px,1.8vw,9px);opacity:.75;}
+.sl{font-weight:700;font-size:clamp(8px,2.2vw,10px);}
+.st{font-size:clamp(7px,2vw,10px);font-weight:600;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;}
+.shared{display:inline-flex;font-size:clamp(6px,1.6vw,8px);font-weight:700;background:var(--shared);color:#fff;border-radius:3px;padding:1px 4px;margin-top:2px;}
+/* Memo blocks */
+.mb{border-radius:4px;padding:clamp(2px,.6vw,3px) clamp(2px,1vw,5px);margin-bottom:2px;font-size:clamp(8px,2vw,10px);line-height:1.3;display:flex;align-items:flex-start;gap:2px;overflow:hidden;}
+.mb-sj{background:var(--sj-m-bg);border-left:2px solid var(--sj-m);color:var(--sj-m);}
+.mb-bs{background:var(--bs-m-bg);border-left:2px solid var(--bs-m);color:var(--bs-m);}
+.mt{flex:1;word-break:break-all;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mdel{font-size:9px;opacity:.35;cursor:pointer;flex-shrink:0;line-height:1.5;}
+.mdel:hover{opacity:1;}
+.addbtn{width:100%;text-align:center;font-size:13px;color:var(--border);margin-top:1px;line-height:1;cursor:pointer;display:block;}
+.addbtn:hover{color:var(--sj-m);}
+.nosched{font-size:9px;color:var(--border);text-align:center;padding-top:6px;}
+/* Chat */
+.chat{margin:0 6px 28px;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.chat-hdr{display:flex;align-items:center;justify-content:space-between;padding:11px 14px 10px;background:var(--bg);border-bottom:1px solid var(--border);}
+.chat-ttl{font-size:13px;font-weight:700;}
+.chat-ref{background:none;border:none;font-size:16px;color:var(--sub);cursor:pointer;padding:2px 6px;border-radius:6px;}
+.chat-ref:hover{background:var(--divider);}
+.chat-msgs{min-height:120px;max-height:260px;overflow-y:auto;padding:12px 12px 6px;display:flex;flex-direction:column;gap:8px;}
+.chat-date{text-align:center;font-size:10px;font-weight:700;color:var(--sub);display:flex;align-items:center;gap:8px;}
+.chat-date::before,.chat-date::after{content:'';flex:1;height:1px;background:var(--border);}
+.chat-empty{text-align:center;font-size:12px;color:var(--sub);padding:20px 0;}
+.cmsg{display:flex;flex-direction:column;gap:2px;position:relative;max-width:82%;}
+.cmsg.sj{align-self:flex-start;}.cmsg.bs{align-self:flex-end;align-items:flex-end;}
+.cwho{font-size:10px;font-weight:700;color:var(--sub);padding:0 4px;}
+.cbbl{font-size:13px;font-weight:500;padding:8px 12px;border-radius:14px;line-height:1.45;word-break:break-all;display:flex;flex-direction:column;gap:3px;}
+.cbbl-t{line-height:1.45;}.cbbl-time{font-size:9px;opacity:.6;font-weight:400;align-self:flex-end;}
+.cmsg.sj .cbbl{background:var(--sj-m-bg);color:var(--sj-m);border-bottom-left-radius:4px;}
+.cmsg.bs .cbbl{background:var(--bs-m-bg);color:var(--bs-m);border-bottom-right-radius:4px;}
+.cdel{position:absolute;top:18px;font-size:9px;color:var(--sub);opacity:0;cursor:pointer;}
+.cmsg.sj .cdel{right:-16px;}.cmsg.bs .cdel{left:-16px;}
+.cmsg:hover .cdel{opacity:1;}
+.chat-inp{border-top:1px solid var(--border);padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px;background:var(--bg);}
+.cin-row{display:flex;align-items:center;gap:7px;}
+.clbl{font-size:11px;font-weight:700;min-width:28px;text-align:right;flex-shrink:0;}
+.clbl.sj{color:var(--sj-m);}.clbl.bs{color:var(--bs-m);}
+.cin-row input{flex:1;border:1.5px solid var(--border);border-radius:20px;padding:7px 12px;font-size:13px;font-family:inherit;outline:none;background:var(--card);color:var(--text);}
+.cin-row input:focus{border-color:var(--sj-m);}
+.csend{padding:7px 13px;border-radius:20px;background:var(--sj-m);color:#fff;border:none;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;}
+/* Modal */
+.moverlay{display:none;position:fixed;inset:0;background:rgba(44,43,40,.4);z-index:100;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
+.moverlay.open{display:flex;}
+.modal{background:var(--card);border-radius:20px;width:90%;max-width:360px;box-shadow:0 20px 60px rgba(44,43,40,.18);animation:pop .17s ease;overflow:hidden;border:1px solid var(--border);}
+@keyframes pop{from{transform:scale(.93);opacity:0}to{transform:scale(1);opacity:1}}
+.mtabs{display:flex;background:var(--bg);border-bottom:1px solid var(--border);}
+.mtab{flex:1;padding:12px 0;font-size:12px;font-weight:700;text-align:center;cursor:pointer;color:var(--sub);border-bottom:2px solid transparent;}
+.mtab.on{color:var(--sj-m);border-bottom-color:var(--sj-m);background:var(--card);}
+.mbody{padding:18px 18px 16px;}
+.mtitle{font-size:14px;font-weight:800;margin-bottom:14px;}
+.mfield{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.flbl{font-size:12px;font-weight:800;min-width:28px;text-align:right;flex-shrink:0;}
+.flbl.sj{color:var(--sj-m);}.flbl.bs{color:var(--bs-m);}
+.mfield input{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none;background:var(--bg);color:var(--text);}
+.mfield input:focus{border-color:var(--sj-m);}
+.esec{margin-bottom:14px;}
+.esec-ttl{font-size:10px;font-weight:700;color:var(--sub);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;}
+.chips{display:flex;flex-wrap:wrap;gap:6px;}
+.chip{padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid transparent;opacity:.55;}
+.chip:hover{opacity:.85;}.chip.on{opacity:1;border-color:currentColor;}
+.c-sja{background:var(--sj-a-bg);color:var(--sj-a);}
+.c-sjc{background:var(--sj-c-bg);color:var(--sj-c);}
+.c-off{background:var(--off-bg);color:var(--off);}
+.c-non{background:var(--divider);color:var(--sub);}
+.c-bsop{background:var(--bs-open-bg);color:var(--bs-open);}
+.c-bsmd{background:var(--bs-mid-bg);color:var(--bs-mid);}
+.c-bscl{background:var(--bs-close-bg);color:var(--bs-close);}
+.c-bsof{background:var(--off-bg);color:var(--off);}
+.c-bsbl{background:var(--divider);color:var(--sub);}
+.mdiv{height:1px;background:var(--divider);margin:12px 0;}
+.macts{display:flex;gap:8px;margin-top:14px;}
+.btn{flex:1;padding:11px;border-radius:12px;border:none;font-size:13px;font-weight:700;cursor:pointer;}
+.btn-c{background:var(--bg);color:var(--sub);border:1px solid var(--border);}
+.btn-s{background:var(--sj-m);color:#fff;}
+.tpanel{display:none;}.tpanel.on{display:block;}
+/* Responsive */
+@media(max-width:430px){
+  .hdr{padding:8px 10px 7px;}.title{font-size:13px;}.mlbl{font-size:12px;min-width:66px;}
+  .nbtn{width:24px;height:24px;}.lgd{gap:6px;margin-bottom:5px;}.lgd-i{font-size:9px;}
+  .spill{font-size:9px;padding:2px 6px;}.slgd{gap:3px;padding-top:5px;}
+  .cal{padding:5px 4px 10px;}.wd{font-size:9px;}
+  .dc{border-radius:5px;padding:3px 2px 2px;min-height:clamp(72px,18.5vw,100px);}
+  .dnt{font-size:clamp(9px,2.6vw,12px);}.hname{font-size:clamp(5.5px,1.5vw,7px);}
+  .sb{padding:1px 3px;margin-bottom:1px;border-radius:3px;font-size:clamp(7px,2vw,9px);}
+  .mb{padding:1px 3px;margin-bottom:1px;font-size:clamp(6px,1.8vw,8px);}
+  .shared{font-size:clamp(5.5px,1.5vw,7px);padding:1px 3px;}
+  .chat{margin:0 4px 20px;}.cbbl{font-size:12px;padding:7px 10px;}
+  .cin-row input{font-size:12px;padding:6px 10px;}.csend{font-size:11px;padding:6px 10px;}
+}
+@media(max-width:360px){.dc{min-height:clamp(65px,17vw,85px);}.st{display:none;}.sn{display:none;}}
+@media(min-width:600px){
+  .hdr{padding:12px 16px 10px;}.cal{padding:10px 8px 16px;}
+  .week,.weeks,.whdr{gap:4px;}
+  .dc{min-height:120px;border-radius:9px;padding:7px 6px 5px;}
+  .dnt{font-size:13px;}.sb{font-size:10px;padding:3px 5px;}.st{font-size:11px;}
+}
+@supports(padding:env(safe-area-inset-bottom)){
+  body{padding-bottom:env(safe-area-inset-bottom);}
+  .hdr{padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right));}
+}
+@media(hover:none)and(pointer:coarse){.dc:hover{box-shadow:none;}.btn:hover{opacity:1;}.dc:active{box-shadow:0 2px 8px rgba(44,43,40,.12);}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="title">Schedule Viewer</div>
+    <div class="mnav">
+      <button class="nbtn" id="prevBtn">‹</button>
+      <div class="mlbl" id="monthLabel"></div>
+      <button class="nbtn" id="nextBtn">›</button>
+    </div>
+  </div>
+  <div class="lgd">
+    <div class="lgd-i"><div class="lgd-d" style="background:var(--sj-m)"></div><span>지호 일정</span></div>
+    <div class="lgd-i"><div class="lgd-d" style="background:var(--bs-m)"></div><span>새은 일정</span></div>
+  </div>
+  <div class="slgd">
+    <span class="spill" style="background:#EBF2ED;color:#4A7C59">오픈</span>
+    <span class="spill" style="background:#F5EED8;color:#9A7B2F">미들</span>
+    <span class="spill" style="background:#E8EEF7;color:#4A6FA5">마감</span>
+    <span class="spill spill-off">OFF</span>
+  </div>
+</div>
+
+<div class="cal">
+  <div class="whdr">
+    <div class="wd">월</div><div class="wd">화</div><div class="wd">수</div>
+    <div class="wd">목</div><div class="wd">금</div>
+    <div class="wd sat">토</div><div class="wd sun">일</div>
+  </div>
+  <div class="weeks" id="calendar"></div>
+</div>
+
+<div class="chat">
+  <div class="chat-hdr">
+    <span class="chat-ttl">🙏 부탁의 말씀</span>
+    <button class="chat-ref" id="chatRefresh">↻</button>
+  </div>
+  <div class="chat-msgs" id="chatMsgs"><div class="chat-empty">불러오는 중…</div></div>
+  <div class="chat-inp">
+    <div class="cin-row"><span class="clbl sj">지호</span><input id="inSJ" type="text" placeholder="메시지 입력…" autocomplete="off"/><button class="csend" id="sendSJ">전송</button></div>
+    <div class="cin-row"><span class="clbl bs">새은</span><input id="inBS" type="text" placeholder="메시지 입력…" autocomplete="off"/><button class="csend" id="sendBS">전송</button></div>
+  </div>
+</div>
+
+<div class="moverlay" id="overlay">
+  <div class="modal">
+    <div class="mtabs">
+      <div class="mtab on" id="tabMemo">📝 개인 일정</div>
+      <div class="mtab" id="tabEdit">✏️ 스케줄 편집</div>
+    </div>
+    <div class="mbody">
+      <div class="mtitle" id="mTitle"></div>
+      <div class="tpanel on" id="pMemo">
+        <div class="mfield"><label class="flbl sj">지호</label><input id="iSJ" type="text" placeholder="지호 일정 입력…" autocomplete="off"/></div>
+        <div class="mfield"><label class="flbl bs">새은</label><input id="iBS" type="text" placeholder="새은 일정 입력…" autocomplete="off"/></div>
+      </div>
+      <div class="tpanel" id="pEdit">
+        <div class="esec">
+          <div class="esec-ttl">지호 스케줄</div>
+          <div class="chips" id="chipsSJ">
+            <div class="chip c-sja" data-who="sj" data-val="A">08:00~19:00</div>
+            <div class="chip c-sjc" data-who="sj" data-val="C">마감 11:00~22:00</div>
+            <div class="chip c-off" data-who="sj" data-val="rest">OFF</div>
+            <div class="chip c-non" data-who="sj" data-val="">미정</div>
+          </div>
+        </div>
+        <div class="mdiv"></div>
+        <div class="esec">
+          <div class="esec-ttl">새은 스케줄</div>
+          <div class="chips" id="chipsBS">
+            <div class="chip c-bsop" data-who="bs" data-val="오픈1">오픈 09:30</div>
+            <div class="chip c-bsop" data-who="bs" data-val="오픈2">오픈 11:30</div>
+            <div class="chip c-bsmd" data-who="bs" data-val="미들">미들</div>
+            <div class="chip c-bscl" data-who="bs" data-val="마감">마감</div>
+            <div class="chip c-bsof" data-who="bs" data-val="off">OFF</div>
+            <div class="chip c-bsbl" data-who="bs" data-val="">미정</div>
+          </div>
+        </div>
+      </div>
+      <div class="macts">
+        <button class="btn btn-c" id="btnCancel">취소</button>
+        <button class="btn btn-s" id="btnSave">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── 스케줄 데이터 ─────────────────────────────────
+const SCHED = {
+  '2026-6': {
+    sj:{25:'rest'},
+    bs:{25:null},
+  },
+  '2026-7': {
+    sj:{1:'rest',2:'A',3:'A',4:'A',5:'A',6:'A',7:'rest',8:'C',9:'A',10:'A',11:'rest',12:'C',13:'C',14:'rest',15:'rest',16:'A',17:'A',18:'A',19:'A',20:'rest',21:'A',22:'A',23:'A',24:'rest',25:'rest',26:'C',27:'C',28:'A',29:'rest',30:'rest',31:'C'},
+    bs:{1:null,2:null,3:null,4:{l:'마감',t:'16:00~21:00'},5:{l:'오픈',t:'11:30~16:30'},6:{l:'마감',t:'16:00~21:00'},7:{l:'마감',t:'16:00~21:00'},8:{l:'미들',t:'12:00~17:00'},9:null,10:null,11:{l:'마감',t:'16:00~21:00'},12:{l:'오픈',t:'11:30~16:30'},13:{l:'오픈',t:'09:30~14:30'},14:{l:'마감',t:'16:00~21:00'},15:{l:'미들',t:'12:00~17:00'},16:null,17:null,18:{l:'마감',t:'16:00~21:00'},19:{l:'오픈',t:'11:30~16:30'},20:{l:'마감',t:'16:00~21:00'}},
+  },
+};
+const HOL={'2026-1-1':'신정','2026-2-17':'설날연휴','2026-2-18':'설날','2026-2-19':'설날연휴','2026-3-1':'삼일절','2026-5-5':'어린이날','2026-5-24':'부처님오신날','2026-6-6':'현충일','2026-7-17':'제헌절','2026-8-15':'광복절','2026-9-24':'추석연휴','2026-9-25':'추석','2026-9-26':'추석연휴','2026-10-3':'개천절','2026-10-9':'한글날','2026-12-25':'크리스마스'};
+const ST={A:'08:00~19:00',C:'11:00~22:00'};
+const WD=['월','화','수','목','금','토','일'];
+const now=new Date();
+let cY=now.getFullYear(),cM=now.getMonth()+1;
+
+// 메모 (로컬)
+function memoKey(y,m){return `memo_${y}_${m}`;}
+function loadMemos(y,m){try{return JSON.parse(localStorage.getItem(memoKey(y,m)))||{};}catch{return{};}}
+function saveMemos(y,m,d){localStorage.setItem(memoKey(y,m),JSON.stringify(d));}
+
+// 편집 (로컬)
+function editKey(y,m){return `edit_${y}_${m}`;}
+function loadEdits(y,m){try{return JSON.parse(localStorage.getItem(editKey(y,m)))||{sj:{},bs:{}};}catch{return{sj:{},bs:{}};}}
+function saveEdits(y,m,d){localStorage.setItem(editKey(y,m),JSON.stringify(d));}
+
+// 스케줄 로드 (기본값 + 편집 병합)
+function loadSched(y,m){
+  const base=SCHED[`${y}-${m}`]?JSON.parse(JSON.stringify(SCHED[`${y}-${m}`])):{sj:{},bs:{}};
+  const edit=loadEdits(y,m);
+  Object.assign(base.sj,edit.sj);
+  Object.assign(base.bs,edit.bs);
+  return base;
+}
+
+// 헬퍼
+function dow(y,m,d){return(new Date(y,m-1,d).getDay()+6)%7;}
+function hn(y,m,d){return HOL[`${y}-${m}-${d}`]||null;}
+function isToday(y,m,d){return now.getFullYear()===y&&now.getMonth()+1===m&&now.getDate()===d;}
+function isPast(y,m,d){return new Date(y,m-1,d)<new Date(now.getFullYear(),now.getMonth(),now.getDate());}
+
+// 렌더
+function rSJ(sj,d){
+  const s=sj[d]; if(s===undefined)return '';
+  if(s==='rest')return `<div class="sb off-sj"><div class="sn">지호</div><div class="sl">OFF</div></div>`;
+  const cls=s==='C'?'sj-c':'sj-a', lbl=s==='C'?'<div class="sl">마감</div>':'';
+  return `<div class="sb ${cls}"><div class="sn">지호</div>${lbl}<div class="st">${ST[s]}</div></div>`;
+}
+function rBS(bs,d){
+  if(!(d in bs))return ''; const s=bs[d];
+  if(s===null)return `<div class="sb off-bs"><div class="sn">새은</div><div class="sl">OFF</div></div>`;
+  const cm={'오픈':'bs-op','미들':'bs-md','마감':'bs-cl'};
+  return `<div class="sb ${cm[s.l]}"><div class="sn">새은</div><div class="sl">${s.l}</div><div class="st">${s.t}</div></div>`;
+}
+function rMemo(memos,d){
+  const e=memos[d]||{}; let h='';
+  (e.sj||[]).forEach((t,i)=>{h+=`<div class="mb mb-sj"><span class="mt"><b style="font-size:9px">지호</b> ${t}</span><span class="mdel" data-d="${d}" data-w="sj" data-i="${i}">✕</span></div>`;});
+  (e.bs||[]).forEach((t,i)=>{h+=`<div class="mb mb-bs"><span class="mt"><b style="font-size:9px">새은</b> ${t}</span><span class="mdel" data-d="${d}" data-w="bs" data-i="${i}">✕</span></div>`;});
+  return h;
+}
+
+// 달력
+function buildCal(y,m){
+  document.getElementById('monthLabel').textContent=`${y}년 ${m}월`;
+  const sched=loadSched(y,m), memos=loadMemos(y,m);
+  const fd=(new Date(y,m-1,1).getDay()+6)%7, days=new Date(y,m,0).getDate();
+  let html='',week='',cnt=0;
+  for(let i=0;i<fd;i++){week+=`<div class="dc empty"></div>`;cnt++;}
+  for(let d=1;d<=days;d++){
+    const w=dow(y,m,d), dc=w===6?'sun':w===5?'sat':'';
+    const tc=isToday(y,m,d)?' today':'', pc=isPast(y,m,d)?' past':'';
+    const td=isToday(y,m,d)?'<span class="tdot"></span>':'';
+    const h=hn(y,m,d), ht=h?`<span class="hname">${h}</span>`:'', hc=h?' hol':'';
+    const sjB=rSJ(sched.sj,d), bsB=rBS(sched.bs,d), memoB=rMemo(memos,d);
+    const sjOff=sched.sj[d]==='rest', bsOff=(d in sched.bs)&&sched.bs[d]===null;
+    const sharedB=(sjOff&&bsOff)?'<div class="shared">✦ 공동 휴무</div>':'';
+    const noS=!sjB&&!bsB&&!memoB?'<div class="nosched">—</div>':'';
+    week+=`<div class="dc${tc}${pc}" data-day="${d}"><div class="dn ${dc}${hc}"><span class="dnt">${d}</span>${td}${ht}</div>${sjB}${bsB}${sharedB}${memoB}${noS}<span class="addbtn" data-day="${d}">+</span></div>`;
+    cnt++;
+    if(cnt%7===0){html+=`<div class="week">${week}</div>`;week='';}
+  }
+  if(week){while(cnt%7!==0){week+=`<div class="dc empty"></div>`;cnt++;}html+=`<div class="week">${week}</div>`;}
+  document.getElementById('calendar').innerHTML=html;
+}
+
+// 달력 이벤트 (위임)
+document.getElementById('calendar').addEventListener('click',e=>{
+  const del=e.target.closest('.mdel');
+  if(del){
+    e.stopPropagation();
+    const d=+del.dataset.d,w=del.dataset.w,i=+del.dataset.i;
+    const memos=loadMemos(cY,cM);
+    if(memos[d]&&memos[d][w]){memos[d][w].splice(i,1);if(!memos[d].sj.length&&!memos[d].bs.length)delete memos[d];}
+    saveMemos(cY,cM,memos);buildCal(cY,cM);return;
+  }
+  const cell=e.target.closest('.dc');
+  if(cell&&!cell.classList.contains('empty'))openModal(+cell.dataset.day);
+});
+
+// 월 이동
+document.getElementById('prevBtn').addEventListener('click',()=>{cM--;if(cM<1){cM=12;cY--;}buildCal(cY,cM);});
+document.getElementById('nextBtn').addEventListener('click',()=>{cM++;if(cM>12){cM=1;cY++;}buildCal(cY,cM);});
+
+// 모달
+let aDay=null,pSJ=null,pBS=null;
+const overlay=document.getElementById('overlay');
+document.getElementById('tabMemo').addEventListener('click',()=>switchTab('memo'));
+document.getElementById('tabEdit').addEventListener('click',()=>switchTab('edit'));
+function switchTab(t){
+  document.getElementById('tabMemo').classList.toggle('on',t==='memo');
+  document.getElementById('tabEdit').classList.toggle('on',t==='edit');
+  document.getElementById('pMemo').classList.toggle('on',t==='memo');
+  document.getElementById('pEdit').classList.toggle('on',t==='edit');
+}
+function openModal(d){
+  aDay=d;
+  const w=dow(cY,cM,d),h=hn(cY,cM,d);
+  document.getElementById('mTitle').textContent=`${cY}년 ${cM}월 ${d}일 (${WD[w]})${h?' · '+h:''}`;
+  document.getElementById('iSJ').value=''; document.getElementById('iBS').value='';
+  const sched=loadSched(cY,cM), curSJ=sched.sj[d];
+  pSJ=curSJ!==undefined?curSJ:'__u__';
+  const bsRaw=!(d in sched.bs)?'__none__':sched.bs[d]===null?'off':sched.bs[d]?.t==='09:30~14:30'?'오픈1':'오픈2'===sched.bs[d]?.l?'오픈2':sched.bs[d]?.l==='미들'?'미들':sched.bs[d]?.l==='마감'?'마감':'';
+  pBS=bsRaw==='__none__'?'__u__':bsRaw;
+  hiChip('sj',curSJ===undefined?'':curSJ);
+  hiChip('bs',pBS==='__u__'?'':pBS);
+  switchTab('memo');
+  overlay.classList.add('open');
+  setTimeout(()=>document.getElementById('iSJ').focus(),80);
+}
+function closeModal(){overlay.classList.remove('open');aDay=null;}
+function hiChip(who,val){document.querySelectorAll(`.chip[data-who="${who}"]`).forEach(c=>c.classList.toggle('on',c.dataset.val===val));}
+document.getElementById('chipsSJ').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;pSJ=c.dataset.val;hiChip('sj',pSJ);});
+document.getElementById('chipsBS').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;pBS=c.dataset.val;hiChip('bs',pBS);});
+document.getElementById('btnCancel').addEventListener('click',closeModal);
+overlay.addEventListener('click',e=>{if(e.target===overlay)closeModal();});
+document.getElementById('btnSave').addEventListener('click',()=>{
+  const isMemo=document.getElementById('pMemo').classList.contains('on');
+  if(isMemo){
+    const sjT=document.getElementById('iSJ').value.trim(), bsT=document.getElementById('iBS').value.trim();
+    if(!sjT&&!bsT){closeModal();return;}
+    const memos=loadMemos(cY,cM);
+    if(!memos[aDay])memos[aDay]={sj:[],bs:[]};
+    if(!memos[aDay].sj)memos[aDay].sj=[];
+    if(!memos[aDay].bs)memos[aDay].bs=[];
+    if(sjT)memos[aDay].sj.push(sjT);
+    if(bsT)memos[aDay].bs.push(bsT);
+    saveMemos(cY,cM,memos);
+  } else {
+    const edits=loadEdits(cY,cM);
+    if(pSJ!=='__u__'){if(!pSJ)delete edits.sj[aDay]; else edits.sj[aDay]=pSJ;}
+    if(pBS!=='__u__'){
+      if(!pBS) delete edits.bs[aDay];
+      else if(pBS==='off') edits.bs[aDay]=null;
+      else if(pBS==='오픈1') edits.bs[aDay]={l:'오픈',t:'09:30~14:30'};
+      else if(pBS==='오픈2') edits.bs[aDay]={l:'오픈',t:'11:30~16:30'};
+      else if(pBS==='미들')  edits.bs[aDay]={l:'미들',t:'12:00~17:00'};
+      else if(pBS==='마감')  edits.bs[aDay]={l:'마감',t:'16:00~21:00'};
+    }
+    saveEdits(cY,cM,edits);
+  }
+  buildCal(cY,cM);closeModal();
+});
+[document.getElementById('iSJ'),document.getElementById('iBS')].forEach(el=>{
+  el.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('btnSave').click();});
+});
+
+// ── JSONBin (채팅 전용) ───────────────────────────
+const JBIN_KEY='$2a$10$drtvuupLQGyV7qDTXg09Ue3pMr.RSnYfsn0SKZpxyUvNtCA//q1ta';
+const BIN_ID='6a3ce4a6da38895dfefc113a';
+const JBIN_BASE='https://api.jsonbin.io/v3/b';
+async function readBin(){try{const r=await fetch(`${JBIN_BASE}/${BIN_ID}/latest`,{headers:{'X-Master-Key':JBIN_KEY}});if(!r.ok)return{};const j=await r.json();return j.record||{};}catch{return{};}}
+async function writeBin(d){try{await fetch(`${JBIN_BASE}/${BIN_ID}`,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':JBIN_KEY},body:JSON.stringify(d)});}catch{}}
+
+let lastSeen=parseInt(localStorage.getItem('chat_seen')||'0');
+async function reqNotif(){if('Notification'in window&&Notification.permission==='default')await Notification.requestPermission();}
+function pushNotif(who,txt){if('Notification'in window&&Notification.permission==='granted')new Notification(`📅 Schedule Viewer — ${who}`,{body:txt,tag:'sc'});}
+
+async function loadChat(){
+  const remote=await readBin();
+  const today=new Date().toISOString().slice(0,10);
+  const msgs=(remote.messages||[]).filter(m=>!m.date||m.date===today);
+  if(msgs.length>lastSeen){msgs.slice(lastSeen).forEach(m=>pushNotif(m.who,m.text));lastSeen=msgs.length;localStorage.setItem('chat_seen',lastSeen);document.title=`(${msgs.length-lastSeen+msgs.slice(lastSeen).length}) Schedule Viewer`;setTimeout(()=>{document.title='Schedule Viewer';},5000);}
+  renderChat(msgs);
+}
+function renderChat(msgs){
+  const box=document.getElementById('chatMsgs');if(!box)return;
+  const today=new Date().toISOString().slice(0,10);
+  const [,mo,d]=today.split('-');
+  const dl=`${parseInt(mo)}월 ${parseInt(d)}일`;
+  if(!msgs.length){box.innerHTML=`<div class="chat-date">${dl}</div><div class="chat-empty">오늘의 메시지가 없어요 🙏</div>`;return;}
+  box.innerHTML=`<div class="chat-date">${dl}</div>`+msgs.map((m,i)=>`<div class="cmsg ${m.who==='지호'?'sj':'bs'}"><div class="cwho">${m.who}</div><div class="cbbl"><span class="cbbl-t">${m.text}</span><span class="cbbl-time">${m.time}</span></div><span class="cdel" data-i="${i}">✕</span></div>`).join('');
+  box.scrollTop=box.scrollHeight;
+  box.querySelectorAll('.cdel').forEach(btn=>btn.addEventListener('click',async()=>{
+    const remote=await readBin();const today2=new Date().toISOString().slice(0,10);
+    const all=remote.messages||[];const todayMsgs=all.filter(m=>!m.date||m.date===today2);
+    const target=todayMsgs[+btn.dataset.i];remote.messages=all.filter(m=>m!==target);
+    lastSeen=Math.max(0,lastSeen-1);localStorage.setItem('chat_seen',lastSeen);
+    await writeBin(remote);renderChat(remote.messages.filter(m=>!m.date||m.date===today2));
+  }));
+}
+async function sendMsg(who,txt){
+  if(!txt.trim())return;
+  const remote=await readBin();if(!remote.messages)remote.messages=[];
+  const today=new Date().toISOString().slice(0,10);
+  remote.messages=remote.messages.filter(m=>m.date===today);
+  const n=new Date(),time=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+  remote.messages.push({who,text:txt.trim(),time,date:today});
+  lastSeen=remote.messages.length;localStorage.setItem('chat_seen',lastSeen);
+  await writeBin(remote);renderChat(remote.messages);
+}
+
+// 채팅 이벤트
+document.getElementById('sendSJ').addEventListener('click',async()=>{const i=document.getElementById('inSJ');await sendMsg('지호',i.value);i.value='';});
+document.getElementById('sendBS').addEventListener('click',async()=>{const i=document.getElementById('inBS');await sendMsg('새은',i.value);i.value='';});
+document.getElementById('chatRefresh').addEventListener('click',async()=>{const b=document.getElementById('chatRefresh');b.style.transition='transform .3s';b.style.transform='rotate(360deg)';await loadChat();setTimeout(()=>{b.style.transform='';},350);});
+['inSJ','inBS'].forEach(id=>{document.getElementById(id).addEventListener('keydown',async e=>{if(e.key==='Enter'){const who=id==='inSJ'?'지호':'새은';await sendMsg(who,e.target.value);e.target.value='';}});});
+
+// 30초 폴링 (채팅만)
+setInterval(loadChat,30000);
+
+// ── 시작 ─────────────────────────────────────────
+buildCal(cY,cM);  // 스케줄 즉시 표시
+try{reqNotif();}catch{}
+loadChat();       // 채팅 비동기 로드
+</script>
+</body>
+</html>
